@@ -1,0 +1,3 @@
+revision_ten_calendar_controller_admin:
+    resource: "@CalendarBundle/Controller/AdminController.php"
+    type: annotation

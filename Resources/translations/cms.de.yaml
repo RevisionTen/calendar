@@ -1,0 +1,23 @@
+EventRead: "Veranstaltung"
+
+# Events.
+Event created: "Veranstaltung erstellt"
+Event edited: "Veranstaltung bearbeitet"
+Event deleted: "Veranstaltung gelöscht"
+
+calendar:
+    label:
+        salesStatus: "Verkaufsstatus"
+        events: "Veranstaltungen"
+        createEvent: "Veranstaltung erstellen"
+        editEvent: "Veranstaltung bearbeiten"
+        organizer: "Veranstalter"
+        artist: "Künstler"
+        description: "Beschreibung"
+        image: "Bild"
+    salesStates:
+        preSale: "Vorverkauf"
+        sale: "Verkauf"
+        sold: "Ausverkauft"
+        postponed: "Verschoben"
+        cancelled: "Abgesagt"

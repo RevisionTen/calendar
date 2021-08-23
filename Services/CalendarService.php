@@ -41,12 +41,12 @@ class CalendarService
         $eventRead->setPayload($fileData);
         $eventRead->setWebsite($website);
         $eventRead->setLanguage($aggregate->language);
-        $eventRead->setCreated($aggregate->created);
-        $eventRead->setModified($aggregate->modified);
 
         $eventRead->title = $aggregate->title;
         $eventRead->deleted = $aggregate->deleted;
         $eventRead->salesStatus = $aggregate->salesStatus;
+        $eventRead->created = $aggregate->created;
+        $eventRead->modified = $aggregate->modified;
 
         $this->entityManager->persist($eventRead);
         $this->entityManager->flush();

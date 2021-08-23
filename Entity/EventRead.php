@@ -9,6 +9,13 @@ use Doctrine\ORM\Mapping as ORM;
 use RevisionTen\CMS\Traits\LanguageAndWebsiteTrait;
 use RevisionTen\CMS\Traits\ReadModelTrait;
 
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="calendar_event_read", uniqueConstraints={
+ *      @ORM\UniqueConstraint(name="unique_file",
+ *          columns={"uuid"})
+ * })
+ */
 class EventRead
 {
     use ReadModelTrait;

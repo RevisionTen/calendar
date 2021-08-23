@@ -8,7 +8,7 @@ use RevisionTen\CQRS\Model\Aggregate;
 
 class Event extends Aggregate
 {
-    public const STATE_PRE_SALE = 'pre sale';
+    public const STATE_PRE_SALE = 'preSale';
     public const STATE_SALE = 'sale';
     public const STATE_SOLD = 'sold';
     public const STATE_POSTPONED = 'postponed';

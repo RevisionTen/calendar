@@ -1,14 +1,23 @@
 services:
+    RevisionTen\Calendar\Controller\AdminController:
+        autowire: true
+        autoconfigure: true
+        tags: [ 'controller.service_arguments' ]
     RevisionTen\Calendar\Services\CalendarService:
         autowire: true
     RevisionTen\Calendar\EventSubscriber\EventSubscriber:
         autowire: true
         autoconfigure: true
 
+framework:
+    translator:
+        paths:
+            - '%kernel.project_dir%/vendor/revision-ten/calendar/Resources/translations'
+
 cms:
     entities:
         EventRead:
-            label: 'calendar.label.eventRead'
+            label: 'calendar.label.events'
             class: RevisionTen\Calendar\Entity\EventRead
             permissions:
                 list: 'list_generic'
@@ -16,14 +25,17 @@ cms:
                 create: 'create_generic'
                 edit: 'edit_generic'
                 delete: 'delete_generic'
+            templates:
+                list: '@Calendar/Admin/list.html.twig'
             list:
                 sort: [ 'modified', 'desc' ]
                 search_fields:
                     - 'title'
+                    - 'payload'
                 dql_filter: 'entity.deleted IS NULL OR entity.deleted = 0'
                 fields:
                     - { property: 'title', label: 'admin.label.title' }
-                    - { property: 'salesStatus', label: 'calendar.label.salesStatus' }
+                    - { property: 'salesStatus', label: 'calendar.label.salesStatus', template: '@Calendar/Admin/list-sales-status.html.twig' }
                     - { property: 'created', label: 'admin.label.created', type: 'datetime' }
                     - { property: 'modified', label: 'admin.label.modified', type: 'datetime' }
                 actions:
