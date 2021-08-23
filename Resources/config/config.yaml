@@ -1,0 +1,3 @@
+services:
+    RevisionTen\Calendar\Services\CalendarService:
+        autowire: true
