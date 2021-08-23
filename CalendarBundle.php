@@ -1,6 +1,6 @@
 <?php
 
-namespace RevisionTen\Mailchimp;
+namespace RevisionTen\Calendar;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
