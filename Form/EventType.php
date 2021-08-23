@@ -60,6 +60,7 @@ class EventType extends AbstractType
             'label' => 'calendar.label.salesStatus',
             'translation_domain' => 'cms',
             'constraints' => new NotBlank(),
+            'expanded' => true,
             'choices' => [
                 'calendar.salesStates.'.Event::STATE_SALE => Event::STATE_SALE,
                 'calendar.salesStates.'.Event::STATE_PRE_SALE => Event::STATE_PRE_SALE,
