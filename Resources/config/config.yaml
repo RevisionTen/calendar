@@ -1,3 +1,34 @@
 services:
     RevisionTen\Calendar\Services\CalendarService:
         autowire: true
+    RevisionTen\Calendar\EventSubscriber\EventSubscriber:
+        autowire: true
+        autoconfigure: true
+
+cms:
+    entities:
+        EventRead:
+            label: 'calendar.label.eventRead'
+            class: RevisionTen\Calendar\Entity\EventRead
+            permissions:
+                list: 'list_generic'
+                search: 'search_generic'
+                create: 'create_generic'
+                edit: 'edit_generic'
+                delete: 'delete_generic'
+            list:
+                sort: [ 'modified', 'desc' ]
+                search_fields:
+                    - 'title'
+                dql_filter: 'entity.deleted IS NULL OR entity.deleted = 0'
+                fields:
+                    - { property: 'title', label: 'admin.label.title' }
+                    - { property: 'salesStatus', label: 'calendar.label.salesStatus' }
+                    - { property: 'created', label: 'admin.label.created', type: 'datetime' }
+                    - { property: 'modified', label: 'admin.label.modified', type: 'datetime' }
+                actions:
+                    - '-create'
+                    - '-edit'
+                    - '-delete'
+                    - { route: 'calendar_event_edit', label: 'admin.btn.edit', icon: 'fas fa-edit', permission: 'edit_generic' }
+                    - { route: 'calendar_event_delete', label: 'admin.btn.delete', icon: 'fas fa-trash', css_class: 'text-danger', permission: 'delete_generic' }
