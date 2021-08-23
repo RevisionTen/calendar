@@ -32,7 +32,7 @@ class CalendarExtension extends Extension implements PrependExtensionInterface
     public function load(array $configs, ContainerBuilder $container)
     {
         $config = self::mergeCalendarConfig($configs);
-        $container->setParameter('cms_calendar', $config);
+        $container->setParameter('calendar', $config);
     }
 
     public function prepend(ContainerBuilder $container)
@@ -40,6 +40,6 @@ class CalendarExtension extends Extension implements PrependExtensionInterface
         // Load the cms bundle config.
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('config.yaml');
-        $loader->load('cms_calendar.yaml');
+        $loader->load('calendar.yaml');
     }
 }

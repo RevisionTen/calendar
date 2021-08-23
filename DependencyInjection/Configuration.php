@@ -9,7 +9,7 @@ class Configuration implements ConfigurationInterface
 {
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder('cms_calendar');
+        $treeBuilder = new TreeBuilder('calendar');
         $treeBuilder->getRootNode()
             ->children()
                 ->scalarNode('event_form_type')->end()
