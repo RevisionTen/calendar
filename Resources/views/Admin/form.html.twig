@@ -1,5 +1,5 @@
 {% extends '@CMS/Backend/base.html.twig' %}
-{% form_theme form '@CMS/Backend/Form/form_theme.html.twig' %}
+{% form_theme form '@Calendar/Admin/form_theme.html.twig' %}
 
 {% set edit = edit is defined and edit %}
 
@@ -125,8 +125,76 @@
                     </div>
                 </div>
             </div>
-            <div class="p-4">
-                rules
+            <div>
+
+                <table class="my-0 table table-hover small">
+                    {% set cssClass = 'p-4 py-2' %}
+                    <thead>
+                    <tr>
+                        <th class="{{ cssClass }} border-bottom">
+                            {{ 'admin.label.title'|trans({}, 'cms') }}
+                        </th>
+                        <th class="{{ cssClass }} border-bottom">
+                            {{ 'calendar.label.startDate'|trans({}, 'cms') }}
+                        </th>
+                        <th class="{{ cssClass }} border-bottom">
+                            {{ 'calendar.label.frequency'|trans({}, 'cms') }}
+                        </th>
+                        <th class="{{ cssClass }} border-bottom">
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for rule in event.rules %}
+                        <tr>
+                            <td class="{{ cssClass }}">
+                                {{ rule.title }}
+                            </td>
+                            <td class="{{ cssClass }}">
+                                {{ rule.startDate|date('d.m.Y H:i') }}
+                            </td>
+                            <td class="{{ cssClass }}">
+                                {% if rule.frequency == 'daily' %}
+                                    {{ 'calendar.value.repeatsDaily'|trans({
+                                        '%frequencyDays%': rule.frequencyDays,
+                                    }, 'cms') }}
+                                {% elseif rule.frequency == 'weekly' %}
+                                    {{ 'calendar.value.repeatsWeekly'|trans({
+                                        '%frequencyWeeks%': rule.frequencyWeeks,
+                                        '%frequencyWeeksOn%': ('calendar.value.'~rule.frequencyWeeksOn)|trans({}, 'cms'),
+                                    }, 'cms') }}
+                                {% elseif rule.frequency == 'monthly' %}
+                                    {{ 'calendar.value.repeatsMonthly'|trans({
+                                        '%frequencyMonths%': rule.frequencyMonths,
+                                        '%frequencyMonthsOn%': rule.frequencyMonthsOn,
+                                    }, 'cms') }}
+                                {% else %}
+                                    {{ ('calendar.value.'~(rule.frequency ?? 'frequencyNone'))|trans({}, 'cms') }}
+                                {% endif %}
+                            </td>
+                            <td class="{{ cssClass }} text-end">
+                                {% set btnClass = 'text-decoration-none me-2' %}
+
+                                <a href="{{ path('calendar_rule_edit', { eventUuid: event.uuid, ruleUuid: rule.uuid }) }}"
+                                   class="{{ btnClass }}"
+                                   aria-label="{{ 'admin.btn.edit'|trans({}, 'cms') }}"
+                                >
+                                    <span class="fa fa-edit"></span>
+                                </a>
+                                <a href="{{ path('calendar_rule_delete', { eventUuid: event.uuid, ruleUuid: rule.uuid }) }}"
+                                   class="{{ btnClass }} text-danger"
+                                   aria-label="{{ 'admin.btn.delete'|trans({}, 'cms') }}"
+                                >
+                                    <span class="fa fa-trash"></span>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+
+
             </div>
         </div>
 

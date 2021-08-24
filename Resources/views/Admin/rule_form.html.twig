@@ -1,5 +1,5 @@
 {% extends '@CMS/Backend/base.html.twig' %}
-{% form_theme form '@CMS/Backend/Form/form_theme.html.twig' %}
+{% form_theme form '@Calendar/Admin/form_theme.html.twig' %}
 
 {% block content_title %}
     {{ title }}
@@ -29,6 +29,56 @@
 
 {% block content %}
     <div class="p-4">
+
+        {{ form_row(form.title) }}
+        {{ form_row(form.participants) }}
+
+        <div class="row">
+            <div class="col">
+                {{ form_row(form.startDate) }}
+            </div>
+            <div class="col">
+                {{ form_row(form.endDate) }}
+            </div>
+        </div>
+
+        <div class="bg-light rounded border p-4 pb-2 mb-3">
+            <h5 class="mb-4">
+                {{ 'calendar.label.repeats'|trans({}, 'cms') }}
+            </h5>
+
+            {{ form_row(form.frequency) }}
+
+            {% if form.frequencyDays is defined %}
+                {{ form_row(form.frequencyDays) }}
+            {% endif %}
+            {% if form.frequencyWeeks is defined %}
+                <div class="row">
+                    <div class="col">
+                        {{ form_row(form.frequencyWeeks) }}
+                    </div>
+                    <div class="col">
+                        {{ form_row(form.frequencyWeeksOn) }}
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if form.frequencyMonths is defined %}
+                <div class="row">
+                    <div class="col">
+                        {{ form_row(form.frequencyMonths) }}
+                    </div>
+                    <div class="col">
+                        {{ form_row(form.frequencyMonthsOn) }}
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if form.repeatEndDate is defined %}
+                {{ form_row(form.repeatEndDate) }}
+            {% endif %}
+        </div>
+
         {{ form_rest(form) }}
     </div>
 {% endblock %}

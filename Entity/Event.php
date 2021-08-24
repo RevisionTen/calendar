@@ -48,4 +48,24 @@ class Event extends Aggregate
     public array $exclusions = [];
 
     public array $extra = [];
+
+    public function getRule(string $ruleUuid): Rule
+    {
+        return $this->rules[$ruleUuid];
+    }
+
+    public function addRule(Rule $rule): void
+    {
+        $this->rules[$rule->uuid] = $rule;
+    }
+
+    public function updateRule(Rule $rule): void
+    {
+        $this->rules[$rule->uuid] = $rule;
+    }
+
+    public function deleteRule(Rule $rule): void
+    {
+        unset($this->rules[$rule->uuid]);
+    }
 }

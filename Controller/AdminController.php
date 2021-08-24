@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace RevisionTen\Calendar\Controller;
 
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Ramsey\Uuid\Uuid;
 use RevisionTen\Calendar\Command\EventCreateCommand;
+use RevisionTen\Calendar\Command\EventCreateRuleCommand;
 use RevisionTen\Calendar\Command\EventDeleteCommand;
 use RevisionTen\Calendar\Command\EventEditCommand;
+use RevisionTen\Calendar\Command\EventRuleDeleteCommand;
+use RevisionTen\Calendar\Command\EventRuleEditCommand;
 use RevisionTen\Calendar\Entity\Event;
 use RevisionTen\Calendar\Entity\EventRead;
 use RevisionTen\Calendar\Form\EventType;
@@ -18,6 +22,7 @@ use RevisionTen\CQRS\Exception\InterfaceException;
 use RevisionTen\CQRS\Services\AggregateFactory;
 use RevisionTen\CQRS\Services\CommandBus;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -225,6 +230,7 @@ class AdminController extends AbstractController
      * @Route("/calendar/rule/{eventUuid}/create", name="calendar_rule_create")
      *
      * @param Request $request
+     * @param string $eventUuid
      *
      * @return Response
      * @throws InterfaceException
@@ -243,30 +249,155 @@ class AdminController extends AbstractController
          */
         $user = $this->getUser();
 
-        $data = [];
+        $data = [
+            'startDate' => time(),
+            'endDate' => time(),
+        ];
 
         $calendarConfig = $this->getParameter('calendar');
         $formClass = $calendarConfig['rule_form_type'] ?? RuleType::class;
 
-        $form = $this->createForm($formClass, $data);
+        $ignore_validation = $request->get('ignore_validation');
+        $form = $this->createForm($formClass, $data, [
+            'validation_groups' => $ignore_validation ? false : null,
+        ]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if (!$ignore_validation && $form->isSubmitted() && $form->isValid()) {
             $payload = $form->getData();
 
             $queueEvents = false;
-            $success = $this->commandBus->execute(EventEditCommand::class, $eventUuid, $payload, $user->getId(), $queueEvents);
+            $success = $this->commandBus->execute(EventCreateRuleCommand::class, $eventUuid, $payload, $user->getId(), $queueEvents);
             if ($success) {
                 $this->addFlash(
                     'success',
                     $this->translator->trans('Rule created', [], 'cms')
                 );
+
+                return $this->redirectToRoute('calendar_event_edit', [
+                    'uuid' => $eventUuid,
+                ]);
             }
         }
 
         return $this->render('@Calendar/Admin/rule_form.html.twig', [
             'title' => $this->translator->trans('calendar.label.addRule', [], 'cms'),
             'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @Route("/calendar/rule/{eventUuid}/edit/{ruleUuid}", name="calendar_rule_edit")
+     *
+     * @param Request $request
+     * @param string $eventUuid
+     * @param string $ruleUuid
+     *
+     * @return Response
+     * @throws InterfaceException
+     */
+    public function editRule(Request $request, string $eventUuid, string $ruleUuid): Response
+    {
+        $this->denyAccessUnlessGranted('edit_generic');
+
+        /**
+         * @var Event $event
+         */
+        $event = $this->aggregateFactory->build($eventUuid, Event::class);
+        $rule = $event->getRule($ruleUuid);
+
+        /**
+         * @var UserRead $user
+         */
+        $user = $this->getUser();
+
+        $data = [
+            'uuid' => $rule->uuid,
+            'title' => $rule->title,
+            'participants' => $rule->participants,
+            'startDate' => $rule->startDate->getTimestamp(),
+            'endDate' => $rule->endDate->getTimestamp(),
+            'repeatEndDate' => $rule->repeatEndDate ? $rule->repeatEndDate->getTimestamp() : null,
+            'frequency' => $rule->frequency,
+            'frequencyDays' => $rule->frequencyDays,
+            'frequencyMonths' => $rule->frequencyMonths,
+            'frequencyMonthsOn' => $rule->frequencyMonthsOn,
+            'frequencyWeeks' => $rule->frequencyWeeks,
+            'frequencyWeeksOn' => $rule->frequencyWeeksOn,
+        ];
+
+        $calendarConfig = $this->getParameter('calendar');
+        $formClass = $calendarConfig['rule_form_type'] ?? RuleType::class;
+
+        $ignore_validation = $request->get('ignore_validation');
+        $form = $this->createForm($formClass, $data, [
+            'validation_groups' => $ignore_validation ? false : null,
+        ]);
+        $form->handleRequest($request);
+
+        if (!$ignore_validation && $form->isSubmitted() && $form->isValid()) {
+            $payload = $form->getData();
+
+            $queueEvents = false;
+            $success = $this->commandBus->execute(EventRuleEditCommand::class, $eventUuid, $payload, $user->getId(), $queueEvents);
+            if ($success) {
+                $this->addFlash(
+                    'success',
+                    $this->translator->trans('Rule edited', [], 'cms')
+                );
+
+                return $this->redirectToRoute('calendar_event_edit', [
+                    'uuid' => $eventUuid,
+                ]);
+            }
+        }
+
+        return $this->render('@Calendar/Admin/rule_form.html.twig', [
+            'title' => $this->translator->trans('calendar.label.editRule', [], 'cms'),
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @Route("/calendar/rule/{eventUuid}/delete/{ruleUuid}", name="calendar_rule_delete")
+     *
+     * @param Request $request
+     * @param string $eventUuid
+     * @param string $ruleUuid
+     *
+     * @return RedirectResponse
+     * @throws InterfaceException
+     */
+    public function deleteRule(Request $request, string $eventUuid, string $ruleUuid): RedirectResponse
+    {
+        $this->denyAccessUnlessGranted('edit_generic');
+
+        /**
+         * @var Event $event
+         */
+        $event = $this->aggregateFactory->build($eventUuid, Event::class);
+        $rule = $event->getRule($ruleUuid);
+
+        /**
+         * @var UserRead $user
+         */
+        $user = $this->getUser();
+
+        $payload = [
+            'uuid' => $rule->uuid,
+        ];
+
+        $queueEvents = false;
+        $success = $this->commandBus->execute(EventRuleDeleteCommand::class, $eventUuid, $payload, $user->getId(), $queueEvents);
+        if ($success) {
+            $this->addFlash(
+                'success',
+                $this->translator->trans('Rule deleted', [], 'cms')
+            );
+        }
+
+        return $this->redirectToRoute('calendar_event_edit', [
+            'uuid' => $eventUuid,
         ]);
     }
 }

@@ -9,6 +9,8 @@ use DateTimeInterface;
 
 class Rule
 {
+    public string $uuid;
+
     public ?string $title = null;
 
     public ?int $participants = null;
@@ -17,11 +19,24 @@ class Rule
 
     public DateTimeInterface $endDate;
 
-    public function __construct()
+    public ?string $frequency = null;
+
+    public ?DateTimeInterface $repeatEndDate = null;
+
+    public ?int $frequencyDays = null;
+
+    public ?int $frequencyWeeks = null;
+
+    public ?string $frequencyWeeksOn = null;
+
+    public ?int $frequencyMonths = null;
+
+    public ?string $frequencyMonthsOn = null;
+
+    public function __construct(string $uuid)
     {
+        $this->uuid = $uuid;
         $this->startDate = new DateTime();
         $this->endDate = new DateTime();
     }
-
-
 }
