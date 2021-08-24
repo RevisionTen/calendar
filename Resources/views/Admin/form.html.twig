@@ -205,25 +205,29 @@
                     <div class="col-4 text-center d-flex justify-content-center">
                         {{ block('tabs') }}
                     </div>
-                    <div class="col-auto ms-auto">
-                        <span class="btn btn-sm btn-primary">
-                            <span class="fas fa-plus"></span> {{ 'calendar.label.addExclusion'|trans({}, 'cms') }}
-                        </span>
-                    </div>
                 </div>
             </div>
             <div>
 
                 {% for date in event.getDates() %}
                     <div class="border-bottom p-4">
-                        {{ ('calendar.value.'~date.startDate|date('l')|lower)|trans({}, 'cms') }}
-                        {{ date.startDate|date('d.m.Y - H:i') }} Uhr bis
-                        {% if date.startDate|date('d.m.Y') != date.endDate|date('d.m.Y') %}
-                            {{ ('calendar.value.'~date.endDate|date('l')|lower)|trans({}, 'cms') }}
-                            {{ date.endDate|date('d.m.Y - H:i') }} Uhr
-                        {% else %}
-                            {{ date.endDate|date('H:i') }} Uhr
-                        {% endif %}
+                        <div class="row">
+                            <div class="col">
+                                {{ ('calendar.value.'~date.startDate|date('l')|lower)|trans({}, 'cms') }}
+                                {{ date.startDate|date('d.m.Y - H:i') }} Uhr bis
+                                {% if date.startDate|date('d.m.Y') != date.endDate|date('d.m.Y') %}
+                                    {{ ('calendar.value.'~date.endDate|date('l')|lower)|trans({}, 'cms') }}
+                                    {{ date.endDate|date('d.m.Y - H:i') }} Uhr
+                                {% else %}
+                                    {{ date.endDate|date('H:i') }} Uhr
+                                {% endif %}
+                            </div>
+                            <div class="col-auto">
+                                <span class="btn btn-sm btn-light">
+                                    <span class="fas fa-plus"></span> {{ 'calendar.label.addExclusion'|trans({}, 'cms') }}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 {% endfor %}
 
