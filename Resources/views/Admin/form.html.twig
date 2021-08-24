@@ -192,9 +192,6 @@
                     {% endfor %}
                     </tbody>
                 </table>
-
-
-
             </div>
         </div>
 
@@ -215,8 +212,21 @@
                     </div>
                 </div>
             </div>
-            <div class="p-4">
-                exclusions
+            <div>
+
+                {% for date in event.getDates() %}
+                    <div class="border-bottom p-4">
+                        {{ ('calendar.value.'~date.startDate|date('l')|lower)|trans({}, 'cms') }}
+                        {{ date.startDate|date('d.m.Y - H:i') }} Uhr bis
+                        {% if date.startDate|date('d.m.Y') != date.endDate|date('d.m.Y') %}
+                            {{ ('calendar.value.'~date.endDate|date('l')|lower)|trans({}, 'cms') }}
+                            {{ date.endDate|date('d.m.Y - H:i') }} Uhr
+                        {% else %}
+                            {{ date.endDate|date('H:i') }} Uhr
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
             </div>
         </div>
     {% endif %}
