@@ -12,6 +12,7 @@ use RevisionTen\Calendar\Command\EventEditCommand;
 use RevisionTen\Calendar\Entity\Event;
 use RevisionTen\Calendar\Entity\EventRead;
 use RevisionTen\Calendar\Form\EventType;
+use RevisionTen\Calendar\Form\RuleType;
 use RevisionTen\CMS\Model\UserRead;
 use RevisionTen\CQRS\Exception\InterfaceException;
 use RevisionTen\CQRS\Services\AggregateFactory;
@@ -68,7 +69,10 @@ class AdminController extends AbstractController
             'language' => $request->getLocale(),
         ];
 
-        $form = $this->createForm(EventType::class, $event, [
+        $calendarConfig = $this->getParameter('calendar');
+        $formClass = $calendarConfig['event_form_type'] ?? EventType::class;
+
+        $form = $this->createForm($formClass, $event, [
             'page_languages' => $config['page_languages'] ?? null,
         ]);
         $form->handleRequest($request);
@@ -95,6 +99,7 @@ class AdminController extends AbstractController
         return $this->render('@Calendar/Admin/form.html.twig', [
             'title' => $this->translator->trans('calendar.label.createEvent', [], 'cms'),
             'form' => $form->createView(),
+            'edit' => false,
         ]);
     }
 
@@ -146,9 +151,17 @@ class AdminController extends AbstractController
             'description' => $event->description,
             'image' => $event->image,
             'salesStatus' => $event->salesStatus,
+            'keywords' => $event->keywords,
+            'genres' => $event->genres,
+            'partners' => $event->partners,
+            'venue' => $event->venue,
+            'extra' => $event->extra,
         ];
 
-        $form = $this->createForm(EventType::class, $data, [
+        $calendarConfig = $this->getParameter('calendar');
+        $formClass = $calendarConfig['event_form_type'] ?? EventType::class;
+
+        $form = $this->createForm($formClass, $data, [
             'page_languages' => $config['page_languages'] ?? null,
         ]);
         $form->handleRequest($request);
@@ -169,8 +182,11 @@ class AdminController extends AbstractController
         return $this->render('@Calendar/Admin/form.html.twig', [
             'title' => $this->translator->trans('calendar.label.editEvent', [], 'cms'),
             'form' => $form->createView(),
+            'edit' => true,
+            'event' => $event,
         ]);
     }
+
     /**
      * @Route("/calendar/delete", name="calendar_event_delete")
      *
@@ -202,6 +218,55 @@ class AdminController extends AbstractController
 
         return $this->redirectToRoute('cms_list_entity', [
             'entity' => 'EventRead',
+        ]);
+    }
+
+    /**
+     * @Route("/calendar/rule/{eventUuid}/create", name="calendar_rule_create")
+     *
+     * @param Request $request
+     *
+     * @return Response
+     * @throws InterfaceException
+     */
+    public function createRule(Request $request, string $eventUuid): Response
+    {
+        $this->denyAccessUnlessGranted('edit_generic');
+
+        /**
+         * @var Event $event
+         */
+        $event = $this->aggregateFactory->build($eventUuid, Event::class);
+
+        /**
+         * @var UserRead $user
+         */
+        $user = $this->getUser();
+
+        $data = [];
+
+        $calendarConfig = $this->getParameter('calendar');
+        $formClass = $calendarConfig['rule_form_type'] ?? RuleType::class;
+
+        $form = $this->createForm($formClass, $data);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $payload = $form->getData();
+
+            $queueEvents = false;
+            $success = $this->commandBus->execute(EventEditCommand::class, $eventUuid, $payload, $user->getId(), $queueEvents);
+            if ($success) {
+                $this->addFlash(
+                    'success',
+                    $this->translator->trans('Rule created', [], 'cms')
+                );
+            }
+        }
+
+        return $this->render('@Calendar/Admin/rule_form.html.twig', [
+            'title' => $this->translator->trans('calendar.label.addRule', [], 'cms'),
+            'form' => $form->createView(),
         ]);
     }
 }

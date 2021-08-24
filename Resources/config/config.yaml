@@ -5,6 +5,9 @@ services:
         tags: [ 'controller.service_arguments' ]
     RevisionTen\Calendar\Services\CalendarService:
         autowire: true
+        arguments:
+            $config: '%cms%'
+            $calendarConfig: '%calendar%'
     RevisionTen\Calendar\EventSubscriber\EventSubscriber:
         autowire: true
         autoconfigure: true

@@ -1,30 +1,65 @@
 {% extends '@CMS/Backend/base.html.twig' %}
 {% form_theme form '@CMS/Backend/Form/form_theme.html.twig' %}
 
-{% block content_title %}
-    {{ title }}
+{% set edit = edit is defined and edit %}
+
+{% block tabs %}
+    <ul class="btn-group nav nav-pills" role="tablist">
+        <li class="btn-group nav-item" role="presentation">
+            <button class="btn-tab btn btn-sm btn-light active" data-bs-toggle="tab" data-bs-target="#basic" type="button" role="tab" aria-controls="basic" aria-selected="true">
+                {{ 'calendar.label.basicTab'|trans({}, 'cms') }}
+            </button>
+        </li>
+
+        {% if edit %}
+            <li class="btn-group nav-item" role="presentation">
+                <button class="btn-tab btn btn-sm btn-light" data-bs-toggle="tab" data-bs-target="#rules" type="button" role="tab" aria-controls="rules" aria-selected="false">
+                    {{ 'calendar.label.rulesTab'|trans({}, 'cms') }}
+                </button>
+            </li>
+        {% else %}
+            <li class="btn-group nav-item" role="presentation" title="{{ 'calendar.label.saveFirst'|trans({}, 'cms') }}">
+                <button class="btn-tab btn btn-sm btn-light border text-muted" disabled>
+                    {{ 'calendar.label.rulesTab'|trans({}, 'cms') }}
+                </button>
+            </li>
+        {% endif %}
+
+        {% if edit %}
+            <li class="btn-group nav-item" role="presentation">
+                <button class="btn-tab btn btn-sm btn-light" data-bs-toggle="tab" data-bs-target="#exclusions" type="button" role="tab" aria-controls="exclusions" aria-selected="false">
+                    {{ 'calendar.label.exclusionsTab'|trans({}, 'cms') }}
+                </button>
+            </li>
+        {% else %}
+            <li class="btn-group nav-item" role="presentation" title="{{ 'calendar.label.saveFirst'|trans({}, 'cms') }}">
+                <button class="btn-tab btn btn-sm btn-light border text-muted" disabled>
+                    {{ 'calendar.label.exclusionsTab'|trans({}, 'cms') }}
+                </button>
+            </li>
+        {% endif %}
+
+    </ul>
+    <script>
+        // Sync duplicated tabs.
+        var tabEls = document.querySelectorAll('.btn-tab[data-bs-toggle="tab"]');
+        tabEls.forEach((tabEl) => {
+            tabEl.addEventListener('shown.bs.tab', function (event) {
+                let target = event.target.dataset.bsTarget;
+                tabEls.forEach((tabEl) => {
+                    tabEl.classList.remove('active');
+                });
+                var activeTabs = document.querySelectorAll('.btn-tab[data-bs-target="'+target+'"]');
+                activeTabs.forEach((tabEl) => {
+                    tabEl.classList.add('active');
+                });
+            })
+        });
+    </script>
 {% endblock %}
 
-{% block content_wrapper %}
-    {{ form_start(form, {
-        attr: {
-            class: 'content-form col flex-grow-1 overflow-auto d-flex flex-column ' ~ contentClass,
-            style: 'max-height: 100vh'
-        }
-    }) }}
-    {{ block('content_top') }}
-    {{ block('messages') }}
-    {{ block('content') }}
-    {{ form_end(form) }}
-{% endblock content_wrapper %}
-
-{% block content_top_actions %}
-    {% set typeOptions = { attr: { class: 'btn btn-primary btn-sm' } } %}
-    {% if form.save is defined %}
-        <div class="col-auto ms-auto content-actions">
-            {{ form_widget(form.save, typeOptions) }}
-        </div>
-    {% endif %}
+{% block content_title %}
+    {{ title }}
 {% endblock %}
 
 {% block content %}
@@ -33,7 +68,94 @@
     </div>
 {% endblock %}
 
-{% block actions %}
+{% block content_wrapper %}
 
-{% endblock actions %}
+    {# Hide bootstrap tabs when they are inactive #}
+    <style>
+        .fade:not(.show) { display: none; }
+        .tab-pane { display: none; }
+        .tab-pane.active { display: flex; }
+    </style>
+
+    {% set tabClass = 'col flex-grow-1 overflow-auto flex-column tab-pane ' ~ contentClass %}
+
+
+    {{ form_start(form, {
+        attr: {
+            class: 'show active content-form ' ~ tabClass,
+            style: 'max-height: 100vh',
+            id: 'basic',
+            role: 'tabpanel',
+        }
+    }) }}
+        <div class="sticky-top px-4 py-3 {{ contentHeaderClass }}">
+            <div class="row align-items-center">
+                <div class="col-4 fw-bold content-title">
+                    {{ block('content_title') }}
+                </div>
+                <div class="col-4 text-center d-flex justify-content-center">
+                    {{ block('tabs') }}
+                </div>
+                {% set typeOptions = { attr: { class: 'btn btn-primary btn-sm' } } %}
+                {% if form.save is defined %}
+                    <div class="col-auto ms-auto content-actions">
+                        {{ form_widget(form.save, typeOptions) }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {{ block('messages') }}
+        {{ block('content') }}
+    {{ form_end(form) }}
+
+    {% if edit %}
+        <div id="rules" role="tabpanel" class="{{ tabClass }}" style="max-height: 100vh;">
+            <div class="sticky-top px-4 py-3 {{ contentHeaderClass }}">
+                <div class="row align-items-center">
+                    <div class="col-4 fw-bold content-title">
+                        {{ block('content_title') }}
+                    </div>
+                    <div class="col-4 text-center d-flex justify-content-center">
+                        {{ block('tabs') }}
+                    </div>
+                    <div class="col-auto ms-auto">
+                        <a href="{{ path('calendar_rule_create', { eventUuid: event.uuid }) }}" class="btn btn-sm btn-primary">
+                            <span class="fas fa-plus"></span> {{ 'calendar.label.addRule'|trans({}, 'cms') }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4">
+                rules
+            </div>
+        </div>
+
+
+        <div id="exclusions" role="tabpanel" class="{{ tabClass }}" style="max-height: 100vh;">
+            <div class="sticky-top px-4 py-3 {{ contentHeaderClass }}">
+                <div class="row align-items-center">
+                    <div class="col-4 fw-bold content-title">
+                        {{ block('content_title') }}
+                    </div>
+                    <div class="col-4 text-center d-flex justify-content-center">
+                        {{ block('tabs') }}
+                    </div>
+                    <div class="col-auto ms-auto">
+                        <span class="btn btn-sm btn-primary">
+                            <span class="fas fa-plus"></span> {{ 'calendar.label.addExclusion'|trans({}, 'cms') }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4">
+                exclusions
+            </div>
+        </div>
+    {% endif %}
+
+{% endblock content_wrapper %}
+
+
+
+
 

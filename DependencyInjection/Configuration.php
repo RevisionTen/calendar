@@ -13,6 +13,8 @@ class Configuration implements ConfigurationInterface
         $treeBuilder->getRootNode()
             ->children()
                 ->scalarNode('event_form_type')->end()
+                ->scalarNode('event_solr_serializer')->end()
+                ->scalarNode('rule_form_type')->end()
             ->end();
 
         return $treeBuilder;

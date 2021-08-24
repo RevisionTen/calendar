@@ -32,6 +32,7 @@ class EventSubscriber implements EventSubscriberInterface
     public function updateReadModel(EventInterface $event): void
     {
         $this->calendarService->updateReadModel($event->getAggregateUuid());
+        $this->calendarService->indexEvent($event->getAggregateUuid());
     }
 
     public function create(EventCreateEvent $event): void

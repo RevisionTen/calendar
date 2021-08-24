@@ -5,21 +5,85 @@ declare(strict_types=1);
 namespace RevisionTen\Calendar\Services;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use RevisionTen\Calendar\Entity\Event;
 use RevisionTen\Calendar\Entity\EventRead;
+use RevisionTen\Calendar\Serializer\EventSerializer;
+use RevisionTen\Calendar\Serializer\SolrSerializerInterface;
 use RevisionTen\CMS\Entity\Website;
+use RevisionTen\CMS\Services\IndexService;
+use RevisionTen\CMS\Services\PageService;
 use RevisionTen\CQRS\Services\AggregateFactory;
+use Solarium\Core\Client\Adapter\Curl;
+use Solarium\Core\Client\Client;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
-class CalendarService
+class CalendarService extends IndexService
 {
-    protected EntityManagerInterface $entityManager;
-
     protected AggregateFactory $aggregateFactory;
 
-    public function __construct(EntityManagerInterface $entityManager, AggregateFactory $aggregateFactory)
+    protected array $calendarConfig;
+
+    protected ContainerInterface $container;
+
+    public function __construct(ContainerInterface $container, LoggerInterface $logger, EntityManagerInterface $entityManager, PageService $pageService, array $config, AggregateFactory $aggregateFactory, array $calendarConfig)
     {
-        $this->entityManager = $entityManager;
+        parent::__construct($container, $logger, $entityManager, $pageService, $config);
+
         $this->aggregateFactory = $aggregateFactory;
+        $this->calendarConfig = $calendarConfig;
+        $this->container = $container;
+    }
+
+    public function indexEvent(string $aggregateUuid): void
+    {
+        if (null === $this->solrConfig) {
+            // Do nothing if solr is not configured.
+            return;
+        }
+
+        /**
+         * @var Event $event
+         */
+        $event = $this->aggregateFactory->build($aggregateUuid, Event::class);
+
+        /**
+         * @var EventRead $eventRead
+         */
+        $eventRead = $this->entityManager->getRepository(EventRead::class)->findOneBy([
+            'uuid' => $aggregateUuid,
+        ]);
+
+        $adapter = new Curl();
+        $eventDispatcher = new EventDispatcher();
+        $client = new Client($adapter, $eventDispatcher, $this->solrConfig);
+
+        $update = $client->createUpdate();
+
+        $serializer = $this->calendarConfig['event_solr_serializer'] ?? false;
+        if ($serializer && class_exists($serializer) && in_array(SolrSerializerInterface::class, class_implements($serializer), true)) {
+            try {
+                // Get the serializer as a service.
+                $serializer = $this->container->get($serializer);
+            } catch (ServiceNotFoundException $e) {
+                /**
+                 * @var SolrSerializerInterface $serializer
+                 */
+                $serializer = new $serializer();
+            }
+        } else {
+            $serializer = new EventSerializer();
+        }
+
+        $documents = $serializer->serialize($update, $event, $eventRead);
+
+        $update->addDocuments($documents);
+        $update->addCommit();
+        $update->addOptimize();
+
+        $client->update($update);
     }
 
     public function updateReadModel(string $aggregateUuid): void

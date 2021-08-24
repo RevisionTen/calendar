@@ -1,3 +1,5 @@
 
 calendar:
     event_form_type: 'RevisionTen\Calendar\Form\EventType'
+    event_solr_serializer: 'RevisionTen\Calendar\Serializer\EventSerializer' # Must implement RevisionTen\Calendar\Serializer\SolrSerializerInterface
+    rule_form_type: 'RevisionTen\Calendar\Form\RuleType'

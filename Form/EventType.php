@@ -10,6 +10,8 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
@@ -56,6 +58,63 @@ class EventType extends AbstractType
             'required' => false,
         ]);
 
+        $genresOptions = [
+            'label' => 'calendar.label.genres',
+            'translation_domain' => 'cms',
+            'required' => false,
+            'multiple' => true,
+            'choices' => [],
+            'attr' => [
+                'data-widget' => 'select2',
+                'data-select2-tags' => 'true',
+            ],
+        ];
+        $builder->add('genres', ChoiceType::class, $genresOptions);
+        $builder->addEventListener(FormEvents::PRE_SUBMIT, static function (FormEvent $event) use ($genresOptions) {
+            self::choiceAdder($event, 'genres', $genresOptions);
+        });
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, static function (FormEvent $event) use ($genresOptions) {
+            self::choiceAdder($event, 'genres', $genresOptions);
+        });
+
+        $keywordsOptions = [
+            'label' => 'calendar.label.keywords',
+            'translation_domain' => 'cms',
+            'required' => false,
+            'multiple' => true,
+            'choices' => [],
+            'attr' => [
+                'data-widget' => 'select2',
+                'data-select2-tags' => 'true',
+            ],
+        ];
+        $builder->add('keywords', ChoiceType::class, $keywordsOptions);
+        $builder->addEventListener(FormEvents::PRE_SUBMIT, static function (FormEvent $event) use ($keywordsOptions) {
+            self::choiceAdder($event, 'keywords', $keywordsOptions);
+        });
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, static function (FormEvent $event) use ($keywordsOptions) {
+            self::choiceAdder($event, 'keywords', $keywordsOptions);
+        });
+
+        $partnersOptions = [
+            'label' => 'calendar.label.partners',
+            'translation_domain' => 'cms',
+            'required' => false,
+            'multiple' => true,
+            'choices' => [],
+            'attr' => [
+                'data-widget' => 'select2',
+                'data-select2-tags' => 'true',
+            ],
+        ];
+        $builder->add('partners', ChoiceType::class, $partnersOptions);
+        $builder->addEventListener(FormEvents::PRE_SUBMIT, static function (FormEvent $event) use ($partnersOptions) {
+            self::choiceAdder($event, 'partners', $partnersOptions);
+        });
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, static function (FormEvent $event) use ($partnersOptions) {
+            self::choiceAdder($event, 'partners', $partnersOptions);
+        });
+
         $builder->add('salesStatus', ChoiceType::class, [
             'label' => 'calendar.label.salesStatus',
             'translation_domain' => 'cms',
@@ -82,6 +141,27 @@ class EventType extends AbstractType
             'label' => 'admin.btn.save',
             'translation_domain' => 'cms',
         ]);
+    }
+
+    public static function choiceAdder(FormEvent $event, string $fieldName, array $options): void
+    {
+        $form = $event->getForm();
+        $data = $event->getData()[$fieldName] ?? null;
+
+        if (!empty($data)) {
+            $choices = $options['choices'];
+            $choices = array_combine($choices, $choices);
+
+            if (is_array($data)) {
+                foreach($data as $choice) {
+                    $choices[$choice] = $choice;
+                }
+            } else {
+                $choices[$data] = $data;
+            }
+            $options['choices'] = $choices;
+            $form->add($fieldName, ChoiceType::class, $options);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void

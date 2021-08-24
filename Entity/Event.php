@@ -40,7 +40,12 @@ class Event extends Aggregate
 
     public array $partners = [];
 
+    /**
+     * @var Rule[]
+     */
     public array $rules = [];
 
     public array $exclusions = [];
+
+    public array $extra = [];
 }
