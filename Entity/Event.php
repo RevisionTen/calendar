@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace RevisionTen\Calendar\Entity;
 
+use Exception;
 use RevisionTen\CQRS\Model\Aggregate;
 
 class Event extends Aggregate
@@ -67,5 +68,19 @@ class Event extends Aggregate
     public function deleteRule(Rule $rule): void
     {
         unset($this->rules[$rule->uuid]);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getDates(): array
+    {
+        $dates = [];
+
+        foreach ($this->rules as $rule) {
+            array_push($dates, ...$rule->getDates($this));
+        }
+
+        return $dates;
     }
 }
