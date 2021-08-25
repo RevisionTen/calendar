@@ -131,4 +131,39 @@ class Event extends Aggregate
 
         return $dates;
     }
+
+    /**
+     * @throws Exception
+     */
+    public function getOrphanedDeviations(): array
+    {
+        /**
+         * @var Date[] $dates
+         */
+        $dates = [];
+
+        foreach ($this->rules as $rule) {
+            array_push($dates, ...$rule->getDates($this));
+        }
+
+        usort($dates, static function(Date $a, Date $b) {
+            return $a->startDate->getTimestamp() >= $b->startDate->getTimestamp();
+        });
+
+        // Apply deviations.
+        $deviations = [];
+        foreach ($this->deviations as $deviation) {
+            $key = $deviation->deviationStartDate->getTimestamp() . '_' . $deviation->deviationEndDate->getTimestamp();
+            $deviations[$key] = $deviation;
+        }
+
+        foreach ($dates as $date) {
+            $key = $date->startDate->getTimestamp() . '_' . $date->endDate->getTimestamp();
+            if (isset($deviations[$key])) {
+                unset($deviations[$key]);
+            }
+        }
+
+        return $deviations;
+    }
 }

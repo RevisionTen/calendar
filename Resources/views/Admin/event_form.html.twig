@@ -212,6 +212,63 @@
             <div>
 
 
+                {% set orphanedDeviations = event.getOrphanedDeviations() %}
+                {% if orphanedDeviations is not empty %}
+                    <div class="p-4 alert alert-warning m-0 border-bottom">
+                        <h5 class="mb-3">
+                            Verwaiste Ausnahmen
+                        </h5>
+                        <table class="border border-warning my-0 table-warning table table-hover small">
+                            <thead>
+                            <tr>
+                                <th class="{{ cssClass }} border-bottom border-warning">
+                                    {{ 'calendar.label.dateRange'|trans({}, 'cms') }}
+                                </th>
+                                <th class="{{ cssClass }} border-bottom border-warning">
+                                    {{ 'calendar.label.deviation'|trans({}, 'cms') }}
+                                </th>
+                                <th class="{{ cssClass }} border-bottom border-warning">
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for deviation in orphanedDeviations %}
+                                <tr>
+                                    <td class="{{ cssClass }} border-warning">
+                                        {{ ('calendar.value.'~deviation.deviationStartDate|date('l')|lower)|trans({}, 'cms') }}
+                                        {{ deviation.deviationStartDate|date('d.m.Y - H:i') }} Uhr bis
+                                        {% if deviation.deviationStartDate|date('d.m.Y') != deviation.deviationEndDate|date('d.m.Y') %}
+                                            {{ ('calendar.value.'~deviation.deviationEndDate|date('l')|lower)|trans({}, 'cms') }}
+                                            {{ deviation.deviationEndDate|date('d.m.Y - H:i') }} Uhr
+                                        {% else %}
+                                            {{ deviation.deviationEndDate|date('H:i') }} Uhr
+                                        {% endif %}
+                                    </td>
+                                    <td class="{{ cssClass }} border-warning">
+                                        {% include '@Calendar/Admin/_deviation.html.twig' %}
+                                    </td>
+                                    <td class="{{ cssClass }} border-warning text-end">
+                                        {% set btnClass = 'text-decoration-none me-2' %}
+                                        <a href="{{ path('calendar_deviation_edit', { eventUuid: event.uuid, deviationUuid: deviation.uuid }) }}"
+                                           class="{{ btnClass }}"
+                                           aria-label="{{ 'calendar.label.editDeviation'|trans({}, 'cms') }}"
+                                        >
+                                            <span class="fas fa-edit"></span>
+                                        </a>
+                                        <a href="{{ path('calendar_deviation_delete', { eventUuid: event.uuid, deviationUuid: deviation.uuid }) }}"
+                                           class="{{ btnClass }} text-danger"
+                                           aria-label="{{ 'calendar.label.deleteDeviation'|trans({}, 'cms') }}"
+                                        >
+                                            <span class="fa fa-trash"></span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+
                 <table class="my-0 table table-hover small">
                     <thead>
                     <tr>
@@ -247,33 +304,8 @@
                             </td>
                             <td class="{{ cssClass }}">
                                 {% if date.deviation %}
-                                    {% if date.deviation.participants %}
-                                        <div>
-                                            {{ 'calendar.label.participants'|trans({}, 'cms') }}: {{ date.deviation.participants }}
-                                        </div>
-                                    {% endif %}
-                                    {% if date.deviation.salesStatus %}
-                                        <div>
-                                            {{ 'calendar.label.salesStatus'|trans({}, 'cms') }}: {{ ('calendar.salesStates.'~date.deviation.salesStatus)|trans({}, 'cms') }}
-                                        </div>
-                                    {% endif %}
-                                    {% if date.deviation.startDate or date.deviation.endDate %}
-                                        <div class="row gx-2">
-                                            <div class="col-auto">
-                                                Veschoben:
-                                            </div>
-                                            {% if date.deviation.startDate %}
-                                                <div class="col-auto">
-                                                    {{ 'calendar.label.startDate'|trans({}, 'cms') }}: {{ date.deviation.startDate|date('d.m.Y H:i') }}
-                                                </div>
-                                            {% endif %}
-                                            {% if date.deviation.endDate %}
-                                                <div class="col-auto">
-                                                    {{ 'calendar.label.endDate'|trans({}, 'cms') }}: {{ date.deviation.endDate|date('d.m.Y H:i') }}
-                                                </div>
-                                            {% endif %}
-                                        </div>
-                                    {% endif %}
+                                    {% set deviation = date.deviation %}
+                                    {% include '@Calendar/Admin/_deviation.html.twig' %}
                                 {% endif %}
                             </td>
                             <td class="{{ cssClass }} text-end">
@@ -300,7 +332,6 @@
                                         <span class="fas fa-plus"></span> {{ 'calendar.label.addDeviation'|trans({}, 'cms') }}
                                     </a>
                                 {% endif %}
-
                             </td>
                         </tr>
                     {% endfor %}

@@ -31,12 +31,8 @@ class EventSerializer implements SolrSerializerInterface
         $docs[$id]->template_s = 'Event';
         $docs[$id]->created_dt = $helper->formatDate($event->created);
         $docs[$id]->modified_dt = $helper->formatDate($event->modified);
-
         $docs[$id]->title_t = $helper->filterControlCharacters($event->title);
         $docs[$id]->description_t = $helper->filterControlCharacters($event->description);
-
-        // Todo.
-        $docs[$id]->url_s = '';
 
         return $docs;
     }

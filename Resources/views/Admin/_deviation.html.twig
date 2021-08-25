@@ -1,0 +1,27 @@
+{% if deviation.participants %}
+    <div>
+        {{ 'calendar.label.participants'|trans({}, 'cms') }}: {{ deviation.participants }}
+    </div>
+{% endif %}
+{% if deviation.salesStatus %}
+    <div>
+        {{ 'calendar.label.salesStatus'|trans({}, 'cms') }}: {{ ('calendar.salesStates.'~deviation.salesStatus)|trans({}, 'cms') }}
+    </div>
+{% endif %}
+{% if deviation.startDate or deviation.endDate %}
+    <div class="row gx-2">
+        <div class="col-auto">
+            Veschoben:
+        </div>
+        {% if deviation.startDate %}
+            <div class="col-auto">
+                {{ 'calendar.label.startDate'|trans({}, 'cms') }}: {{ deviation.startDate|date('d.m.Y H:i') }}
+            </div>
+        {% endif %}
+        {% if deviation.endDate %}
+            <div class="col-auto">
+                {{ 'calendar.label.endDate'|trans({}, 'cms') }}: {{ deviation.endDate|date('d.m.Y H:i') }}
+            </div>
+        {% endif %}
+    </div>
+{% endif %}
