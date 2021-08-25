@@ -14,9 +14,23 @@ class Rule
 {
     public string $uuid;
 
+    public ?string $ruleTitle = null;
+
     public ?string $title = null;
 
     public ?int $participants = null;
+
+    public ?array $venue = null;
+
+    public ?string $artist = null;
+
+    public ?string $organizer = null;
+
+    public ?string $description = null;
+
+    public ?string $bookingInfo = null;
+
+    public ?array $extra = null;
 
     public DateTimeInterface $startDate;
 
@@ -83,16 +97,37 @@ class Rule
         return $dates;
     }
 
-    protected function getDate(DateTimeInterface $startDate, DateTimeInterface $endDate, Event $event): array
+    protected function getDate(DateTimeInterface $startDate, DateTimeInterface $endDate, Event $event): Date
     {
-        return [
-            'ruleUuid' => $this->uuid,
-            'eventUuid' => $event->uuid,
-            'startDate' => $startDate,
-            'endDate' => $endDate,
-            'title' => $event->title,
-            'participants' => $this->participants,
-        ];
+        $date = new Date();
+
+        $date->ruleTitle = $this->ruleTitle;
+        $date->participants = $this->participants;
+        $date->endDate = $endDate;
+        $date->startDate = $startDate;
+
+        $date->eventUuid = $event->uuid;
+        $date->ruleUuid = $this->uuid;
+
+        $date->website = $event->website;
+        $date->language = $event->language;
+        $date->salesStatus = $event->salesStatus;
+        $date->image = $event->image;
+        $date->genres = $event->genres;
+        $date->keywords = $event->keywords;
+        $date->partners = $event->partners;
+
+        $date->eventExtra = $event->extra;
+        $date->ruleExtra = $this->extra;
+
+        $date->artist = $this->artist ?? $event->artist;
+        $date->venue = $this->venue ?? $event->venue;
+        $date->description = $this->description ?? $event->description;
+        $date->bookingInfo = $this->bookingInfo ?? $event->bookingInfo;
+        $date->title = $this->title ?? $event->title;
+        $date->organizer = $this->organizer ?? $event->organizer;
+
+        return $date;
     }
 
     /**

@@ -109,6 +109,9 @@
     {{ form_end(form) }}
 
     {% if edit %}
+
+        {% set cssClass = 'p-4 py-2' %}
+
         <div id="rules" role="tabpanel" class="{{ tabClass }}" style="max-height: 100vh;">
             <div class="sticky-top px-4 py-3 {{ contentHeaderClass }}">
                 <div class="row align-items-center">
@@ -128,11 +131,10 @@
             <div>
 
                 <table class="my-0 table table-hover small">
-                    {% set cssClass = 'p-4 py-2' %}
                     <thead>
                     <tr>
                         <th class="{{ cssClass }} border-bottom">
-                            {{ 'admin.label.title'|trans({}, 'cms') }}
+                            {{ 'calendar.label.ruleTitle'|trans({}, 'cms') }}
                         </th>
                         <th class="{{ cssClass }} border-bottom">
                             {{ 'calendar.label.startDate'|trans({}, 'cms') }}
@@ -148,7 +150,7 @@
                     {% for rule in event.rules %}
                         <tr>
                             <td class="{{ cssClass }}">
-                                {{ rule.title }}
+                                {{ rule.ruleTitle }}
                             </td>
                             <td class="{{ cssClass }}">
                                 {{ rule.startDate|date('d.m.Y H:i') }}
@@ -209,10 +211,25 @@
             </div>
             <div>
 
-                {% for date in event.getDates() %}
-                    <div class="border-bottom p-4">
-                        <div class="row">
-                            <div class="col">
+
+                <table class="my-0 table table-hover small">
+                    <thead>
+                    <tr>
+                        <th class="{{ cssClass }} border-bottom">
+                            {{ 'calendar.label.dateRange'|trans({}, 'cms') }}
+                        </th>
+                        <th class="{{ cssClass }} border-bottom">
+                            {{ 'calendar.label.ruleTitle'|trans({}, 'cms') }}
+                        </th>
+                        <th class="{{ cssClass }} border-bottom">
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% set dates = event.getDates() %}
+                    {% for date in dates %}
+                        <tr>
+                            <td class="{{ cssClass }}">
                                 {{ ('calendar.value.'~date.startDate|date('l')|lower)|trans({}, 'cms') }}
                                 {{ date.startDate|date('d.m.Y - H:i') }} Uhr bis
                                 {% if date.startDate|date('d.m.Y') != date.endDate|date('d.m.Y') %}
@@ -221,15 +238,27 @@
                                 {% else %}
                                     {{ date.endDate|date('H:i') }} Uhr
                                 {% endif %}
-                            </div>
-                            <div class="col-auto">
-                                <span class="btn btn-sm btn-light">
+                            </td>
+                            <td class="{{ cssClass }}">
+                                {{ date.ruleTitle }}
+                            </td>
+                            <td class="{{ cssClass }} text-end">
+                                {% set btnClass = 'text-decoration-none me-2' %}
+
+                                <a href="#"
+                                   class="{{ btnClass }}"
+                                   aria-label="{{ 'calendar.label.addExclusion'|trans({}, 'cms') }}"
+                                >
                                     <span class="fas fa-plus"></span> {{ 'calendar.label.addExclusion'|trans({}, 'cms') }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {{ dump(dates) }}
+
+
 
             </div>
         </div>

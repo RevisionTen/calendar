@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace RevisionTen\Calendar\Entity;
 
+use DateTimeInterface;
 use Exception;
 use RevisionTen\CQRS\Model\Aggregate;
 
@@ -24,6 +25,8 @@ class Event extends Aggregate
     public ?string $title = null;
 
     public ?string $description = null;
+
+    public ?string $bookingInfo = null;
 
     public ?string $artist = null;
 
@@ -46,7 +49,10 @@ class Event extends Aggregate
      */
     public array $rules = [];
 
-    public array $exclusions = [];
+    /**
+     * @var Deviation[]
+     */
+    public array $deviations = [];
 
     public array $extra = [];
 
@@ -70,6 +76,28 @@ class Event extends Aggregate
         unset($this->rules[$rule->uuid]);
     }
 
+    public function getDeviation(DateTimeInterface $ruleStartDate, DateTimeInterface $ruleEndDate): Deviation
+    {
+        $proxyDeviation = new Deviation($ruleStartDate, $ruleEndDate);
+
+        return $this->deviations[$proxyDeviation->getKey()];
+    }
+
+    public function addDeviation(Deviation $deviation): void
+    {
+        $this->deviations[$deviation->getKey()] = $deviation;
+    }
+
+    public function updateDeviation(Deviation $deviation): void
+    {
+        $this->deviations[$deviation->getKey()] = $deviation;
+    }
+
+    public function deleteDeviation(Deviation $deviation): void
+    {
+        unset($this->deviations[$deviation->getKey()]);
+    }
+
     /**
      * @throws Exception
      */
@@ -80,6 +108,10 @@ class Event extends Aggregate
         foreach ($this->rules as $rule) {
             array_push($dates, ...$rule->getDates($this));
         }
+
+        usort($dates, static function(Date $a, Date $b) {
+            return $a->startDate->getTimestamp() >= $b->startDate->getTimestamp();
+        });
 
         return $dates;
     }

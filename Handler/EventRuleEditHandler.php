@@ -27,8 +27,15 @@ final class EventRuleEditHandler implements HandlerInterface
         $ruleUuid = $payload['uuid'];
 
         $rule = $aggregate->getRule($ruleUuid);
+        $rule->ruleTitle = $payload['ruleTitle'];
         $rule->title = $payload['title'];
         $rule->participants = !empty($payload['participants']) ? (int) $payload['participants'] : null;
+        $rule->description = $payload['description'] ?? null;
+        $rule->bookingInfo = $payload['bookingInfo'] ?? null;
+        $rule->venue = $payload['venue'] ?? null;
+        $rule->artist = $payload['artist'] ?? null;
+        $rule->organizer = $payload['organizer'] ?? null;
+        $rule->extra = $payload['extra'] ?? null;
 
         $repeatEndDate = $payload['repeatEndDate'] ?? null;
         if (!empty($repeatEndDate)) {
@@ -71,9 +78,9 @@ final class EventRuleEditHandler implements HandlerInterface
     {
         $payload = $command->getPayload();
 
-        if (empty($payload['title'])) {
+        if (empty($payload['ruleTitle'])) {
             throw new CommandValidationException(
-                'You must enter a title',
+                'You must enter a rule title',
                 CODE_BAD_REQUEST,
                 NULL,
                 $command

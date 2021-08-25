@@ -46,6 +46,12 @@ class EventType extends AbstractType
             'constraints' => new NotBlank(),
         ]);
 
+        $builder->add('bookingInfo', TextareaType::class, [
+            'label' => 'calendar.label.bookingInfo',
+            'translation_domain' => 'cms',
+            'required' => false,
+        ]);
+
         $builder->add('artist', TextType::class, [
             'label' => 'calendar.label.artist',
             'translation_domain' => 'cms',

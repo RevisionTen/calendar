@@ -75,7 +75,8 @@ class AdminController extends AbstractController
         ];
 
         $calendarConfig = $this->getParameter('calendar');
-        $formClass = $calendarConfig['event_form_type'] ?? EventType::class;
+        $formClass = $calendarConfig['event_form_type'];
+        $template = $calendarConfig['event_form_template'];
 
         $form = $this->createForm($formClass, $event, [
             'page_languages' => $config['page_languages'] ?? null,
@@ -101,7 +102,7 @@ class AdminController extends AbstractController
             }
         }
 
-        return $this->render('@Calendar/Admin/form.html.twig', [
+        return $this->render($template, [
             'title' => $this->translator->trans('calendar.label.createEvent', [], 'cms'),
             'form' => $form->createView(),
             'edit' => false,
@@ -164,7 +165,8 @@ class AdminController extends AbstractController
         ];
 
         $calendarConfig = $this->getParameter('calendar');
-        $formClass = $calendarConfig['event_form_type'] ?? EventType::class;
+        $formClass = $calendarConfig['event_form_type'];
+        $template = $calendarConfig['event_form_template'];
 
         $form = $this->createForm($formClass, $data, [
             'page_languages' => $config['page_languages'] ?? null,
@@ -184,7 +186,7 @@ class AdminController extends AbstractController
             }
         }
 
-        return $this->render('@Calendar/Admin/form.html.twig', [
+        return $this->render($template, [
             'title' => $this->translator->trans('calendar.label.editEvent', [], 'cms'),
             'form' => $form->createView(),
             'edit' => true,
@@ -255,7 +257,8 @@ class AdminController extends AbstractController
         ];
 
         $calendarConfig = $this->getParameter('calendar');
-        $formClass = $calendarConfig['rule_form_type'] ?? RuleType::class;
+        $formClass = $calendarConfig['rule_form_type'];
+        $template = $calendarConfig['rule_form_template'];
 
         $ignore_validation = $request->get('ignore_validation');
         $form = $this->createForm($formClass, $data, [
@@ -280,7 +283,7 @@ class AdminController extends AbstractController
             }
         }
 
-        return $this->render('@Calendar/Admin/rule_form.html.twig', [
+        return $this->render($template, [
             'title' => $this->translator->trans('calendar.label.addRule', [], 'cms'),
             'form' => $form->createView(),
         ]);
@@ -313,6 +316,11 @@ class AdminController extends AbstractController
 
         $data = [
             'uuid' => $rule->uuid,
+            'ruleTitle' => $rule->ruleTitle,
+            'description' => $rule->description,
+            'venue' => $rule->venue,
+            'artist' => $rule->artist,
+            'organizer' => $rule->organizer,
             'title' => $rule->title,
             'participants' => $rule->participants,
             'startDate' => $rule->startDate->getTimestamp(),
@@ -327,7 +335,8 @@ class AdminController extends AbstractController
         ];
 
         $calendarConfig = $this->getParameter('calendar');
-        $formClass = $calendarConfig['rule_form_type'] ?? RuleType::class;
+        $formClass = $calendarConfig['rule_form_type'];
+        $template = $calendarConfig['rule_form_template'];
 
         $ignore_validation = $request->get('ignore_validation');
         $form = $this->createForm($formClass, $data, [
@@ -352,7 +361,7 @@ class AdminController extends AbstractController
             }
         }
 
-        return $this->render('@Calendar/Admin/rule_form.html.twig', [
+        return $this->render($template, [
             'title' => $this->translator->trans('calendar.label.editRule', [], 'cms'),
             'form' => $form->createView(),
         ]);

@@ -30,8 +30,14 @@
 {% block content %}
     <div class="p-4">
 
-        {{ form_row(form.title) }}
+        {{ form_row(form.ruleTitle) }}
         {{ form_row(form.participants) }}
+
+        {{ form_row(form.title) }}
+        {{ form_row(form.description) }}
+        {{ form_row(form.bookingInfo) }}
+        {{ form_row(form.artist) }}
+        {{ form_row(form.organizer) }}
 
         <div class="row">
             <div class="col">

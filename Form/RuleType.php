@@ -8,6 +8,7 @@ use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
@@ -19,14 +20,44 @@ class RuleType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $builder->add('title', TextType::class, [
-            'label' => 'admin.label.title',
+        $builder->add('ruleTitle', TextType::class, [
+            'label' => 'calendar.label.ruleTitle',
             'translation_domain' => 'cms',
             'constraints' => new NotBlank(),
         ]);
 
         $builder->add('participants', NumberType::class, [
             'label' => 'calendar.label.participants',
+            'translation_domain' => 'cms',
+            'required' => false,
+        ]);
+
+        $builder->add('title', TextType::class, [
+            'label' => 'admin.label.title',
+            'translation_domain' => 'cms',
+            'required' => false,
+        ]);
+
+        $builder->add('description', TextareaType::class, [
+            'label' => 'calendar.label.description',
+            'translation_domain' => 'cms',
+            'required' => false,
+        ]);
+
+        $builder->add('bookingInfo', TextareaType::class, [
+            'label' => 'calendar.label.bookingInfo',
+            'translation_domain' => 'cms',
+            'required' => false,
+        ]);
+
+        $builder->add('artist', TextType::class, [
+            'label' => 'calendar.label.artist',
+            'translation_domain' => 'cms',
+            'required' => false,
+        ]);
+
+        $builder->add('organizer', TextType::class, [
+            'label' => 'calendar.label.organizer',
             'translation_domain' => 'cms',
             'required' => false,
         ]);
