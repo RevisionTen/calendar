@@ -25,6 +25,7 @@ calendar:
         keywords: "Schlagworte"
         genres: "Genres"
         partners: "Partner"
+        venue: "Ort"
         basicTab: "Basisdaten"
         rulesTab: "Wiederholungsregeln"
         exclusionsTab: "Ausnahmen"
