@@ -222,6 +222,9 @@
                             {{ 'calendar.label.ruleTitle'|trans({}, 'cms') }}
                         </th>
                         <th class="{{ cssClass }} border-bottom">
+                            {{ 'calendar.label.deviation'|trans({}, 'cms') }}
+                        </th>
+                        <th class="{{ cssClass }} border-bottom">
                         </th>
                     </tr>
                     </thead>
@@ -242,23 +245,67 @@
                             <td class="{{ cssClass }}">
                                 {{ date.ruleTitle }}
                             </td>
+                            <td class="{{ cssClass }}">
+                                {% if date.deviation %}
+                                    {% if date.deviation.participants %}
+                                        <div>
+                                            {{ 'calendar.label.participants'|trans({}, 'cms') }}: {{ date.deviation.participants }}
+                                        </div>
+                                    {% endif %}
+                                    {% if date.deviation.salesStatus %}
+                                        <div>
+                                            {{ 'calendar.label.salesStatus'|trans({}, 'cms') }}: {{ ('calendar.salesStates.'~date.deviation.salesStatus)|trans({}, 'cms') }}
+                                        </div>
+                                    {% endif %}
+                                    {% if date.deviation.startDate or date.deviation.endDate %}
+                                        <div class="row gx-2">
+                                            <div class="col-auto">
+                                                Veschoben:
+                                            </div>
+                                            {% if date.deviation.startDate %}
+                                                <div class="col-auto">
+                                                    {{ 'calendar.label.startDate'|trans({}, 'cms') }}: {{ date.deviation.startDate|date('d.m.Y H:i') }}
+                                                </div>
+                                            {% endif %}
+                                            {% if date.deviation.endDate %}
+                                                <div class="col-auto">
+                                                    {{ 'calendar.label.endDate'|trans({}, 'cms') }}: {{ date.deviation.endDate|date('d.m.Y H:i') }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                            </td>
                             <td class="{{ cssClass }} text-end">
                                 {% set btnClass = 'text-decoration-none me-2' %}
 
-                                <a href="#"
-                                   class="{{ btnClass }}"
-                                   aria-label="{{ 'calendar.label.addExclusion'|trans({}, 'cms') }}"
-                                >
-                                    <span class="fas fa-plus"></span> {{ 'calendar.label.addExclusion'|trans({}, 'cms') }}
-                                </a>
+                                {% if date.deviation %}
+                                    <a href="{{ path('calendar_deviation_edit', { eventUuid: event.uuid, deviationUuid: date.deviation.uuid }) }}"
+                                       class="{{ btnClass }}"
+                                       aria-label="{{ 'calendar.label.editDeviation'|trans({}, 'cms') }}"
+                                    >
+                                        <span class="fas fa-edit"></span>
+                                    </a>
+                                    <a href="{{ path('calendar_deviation_delete', { eventUuid: event.uuid, deviationUuid: date.deviation.uuid }) }}"
+                                       class="{{ btnClass }} text-danger"
+                                       aria-label="{{ 'calendar.label.deleteDeviation'|trans({}, 'cms') }}"
+                                    >
+                                        <span class="fa fa-trash"></span>
+                                    </a>
+                                {% else %}
+                                    <a href="{{ path('calendar_deviation_create', { eventUuid: event.uuid, start: date.startDate|date('U'), end: date.endDate|date('U') }) }}"
+                                       class="{{ btnClass }}"
+                                       aria-label="{{ 'calendar.label.addDeviation'|trans({}, 'cms') }}"
+                                    >
+                                        <span class="fas fa-plus"></span> {{ 'calendar.label.addDeviation'|trans({}, 'cms') }}
+                                    </a>
+                                {% endif %}
+
                             </td>
                         </tr>
                     {% endfor %}
                     </tbody>
                 </table>
-                {{ dump(dates) }}
-
-
 
             </div>
         </div>

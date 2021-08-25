@@ -6,7 +6,7 @@ namespace RevisionTen\Calendar\Handler;
 
 use DateTime;
 use RevisionTen\Calendar\Entity\Rule;
-use RevisionTen\Calendar\Event\EventCreateRuleEvent;
+use RevisionTen\Calendar\Event\EventRuleCreateEvent;
 use RevisionTen\Calendar\Entity\Event;
 use RevisionTen\CQRS\Exception\CommandValidationException;
 use RevisionTen\CQRS\Interfaces\AggregateInterface;
@@ -14,7 +14,7 @@ use RevisionTen\CQRS\Interfaces\CommandInterface;
 use RevisionTen\CQRS\Interfaces\EventInterface;
 use RevisionTen\CQRS\Interfaces\HandlerInterface;
 
-final class EventCreateRuleHandler implements HandlerInterface
+final class EventRuleCreateHandler implements HandlerInterface
 {
     /**
      * {@inheritdoc}
@@ -67,7 +67,7 @@ final class EventCreateRuleHandler implements HandlerInterface
 
     public function createEvent(CommandInterface $command): EventInterface
     {
-        return new EventCreateRuleEvent(
+        return new EventRuleCreateEvent(
             $command->getAggregateUuid(),
             $command->getUuid(),
             $command->getOnVersion() + 1,

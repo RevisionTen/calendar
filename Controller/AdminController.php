@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace RevisionTen\Calendar\Controller;
 
-use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Ramsey\Uuid\Uuid;
 use RevisionTen\Calendar\Command\EventCreateCommand;
-use RevisionTen\Calendar\Command\EventCreateRuleCommand;
+use RevisionTen\Calendar\Command\EventDeviationCreateCommand;
+use RevisionTen\Calendar\Command\EventDeviationDeleteCommand;
+use RevisionTen\Calendar\Command\EventDeviationEditCommand;
+use RevisionTen\Calendar\Command\EventRuleCreateCommand;
 use RevisionTen\Calendar\Command\EventDeleteCommand;
 use RevisionTen\Calendar\Command\EventEditCommand;
 use RevisionTen\Calendar\Command\EventRuleDeleteCommand;
 use RevisionTen\Calendar\Command\EventRuleEditCommand;
 use RevisionTen\Calendar\Entity\Event;
 use RevisionTen\Calendar\Entity\EventRead;
-use RevisionTen\Calendar\Form\EventType;
-use RevisionTen\Calendar\Form\RuleType;
 use RevisionTen\CMS\Model\UserRead;
 use RevisionTen\CQRS\Exception\InterfaceException;
 use RevisionTen\CQRS\Services\AggregateFactory;
@@ -270,7 +270,7 @@ class AdminController extends AbstractController
             $payload = $form->getData();
 
             $queueEvents = false;
-            $success = $this->commandBus->execute(EventCreateRuleCommand::class, $eventUuid, $payload, $user->getId(), $queueEvents);
+            $success = $this->commandBus->execute(EventRuleCreateCommand::class, $event->uuid, $payload, $user->getId(), $queueEvents);
             if ($success) {
                 $this->addFlash(
                     'success',
@@ -278,7 +278,7 @@ class AdminController extends AbstractController
                 );
 
                 return $this->redirectToRoute('calendar_event_edit', [
-                    'uuid' => $eventUuid,
+                    'uuid' => $event->uuid,
                 ]);
             }
         }
@@ -348,7 +348,7 @@ class AdminController extends AbstractController
             $payload = $form->getData();
 
             $queueEvents = false;
-            $success = $this->commandBus->execute(EventRuleEditCommand::class, $eventUuid, $payload, $user->getId(), $queueEvents);
+            $success = $this->commandBus->execute(EventRuleEditCommand::class, $event->uuid, $payload, $user->getId(), $queueEvents);
             if ($success) {
                 $this->addFlash(
                     'success',
@@ -356,7 +356,7 @@ class AdminController extends AbstractController
                 );
 
                 return $this->redirectToRoute('calendar_event_edit', [
-                    'uuid' => $eventUuid,
+                    'uuid' => $event->uuid,
                 ]);
             }
         }
@@ -370,14 +370,13 @@ class AdminController extends AbstractController
     /**
      * @Route("/calendar/rule/{eventUuid}/delete/{ruleUuid}", name="calendar_rule_delete")
      *
-     * @param Request $request
      * @param string $eventUuid
      * @param string $ruleUuid
      *
      * @return RedirectResponse
      * @throws InterfaceException
      */
-    public function deleteRule(Request $request, string $eventUuid, string $ruleUuid): RedirectResponse
+    public function deleteRule(string $eventUuid, string $ruleUuid): RedirectResponse
     {
         $this->denyAccessUnlessGranted('edit_generic');
 
@@ -397,7 +396,7 @@ class AdminController extends AbstractController
         ];
 
         $queueEvents = false;
-        $success = $this->commandBus->execute(EventRuleDeleteCommand::class, $eventUuid, $payload, $user->getId(), $queueEvents);
+        $success = $this->commandBus->execute(EventRuleDeleteCommand::class, $event->uuid, $payload, $user->getId(), $queueEvents);
         if ($success) {
             $this->addFlash(
                 'success',
@@ -406,7 +405,178 @@ class AdminController extends AbstractController
         }
 
         return $this->redirectToRoute('calendar_event_edit', [
-            'uuid' => $eventUuid,
+            'uuid' => $event->uuid,
+        ]);
+    }
+
+    /**
+     * @Route("/calendar/deviation/{eventUuid}/create/{start}/{end}", name="calendar_deviation_create")
+     *
+     * @param Request $request
+     * @param string $eventUuid
+     *
+     * @return Response
+     * @throws InterfaceException
+     */
+    public function createDeviation(Request $request, string $eventUuid, int $start, int $end): Response
+    {
+        $this->denyAccessUnlessGranted('edit_generic');
+
+        /**
+         * @var Event $event
+         */
+        $event = $this->aggregateFactory->build($eventUuid, Event::class);
+
+        /**
+         * @var UserRead $user
+         */
+        $user = $this->getUser();
+
+        $data = [
+            'deviationStartDate' => $start,
+            'deviationEndDate' => $end,
+        ];
+
+        $calendarConfig = $this->getParameter('calendar');
+        $formClass = $calendarConfig['deviation_form_type'];
+        $template = $calendarConfig['deviation_form_template'];
+
+        $ignore_validation = $request->get('ignore_validation');
+        $form = $this->createForm($formClass, $data, [
+            'validation_groups' => $ignore_validation ? false : null,
+        ]);
+        $form->handleRequest($request);
+
+        if (!$ignore_validation && $form->isSubmitted() && $form->isValid()) {
+            $payload = $form->getData();
+
+            $queueEvents = false;
+            $success = $this->commandBus->execute(EventDeviationCreateCommand::class, $event->uuid, $payload, $user->getId(), $queueEvents);
+            if ($success) {
+                $this->addFlash(
+                    'success',
+                    $this->translator->trans('Deviation created', [], 'cms')
+                );
+
+                return $this->redirectToRoute('calendar_event_edit', [
+                    'uuid' => $event->uuid,
+                ]);
+            }
+        }
+
+        return $this->render($template, [
+            'title' => $this->translator->trans('calendar.label.addDeviation', [], 'cms'),
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @Route("/calendar/deviation/{eventUuid}/edit/{deviationUuid}", name="calendar_deviation_edit")
+     *
+     * @param Request $request
+     * @param string $eventUuid
+     * @param string $deviationUuid
+     *
+     * @return Response
+     * @throws InterfaceException
+     */
+    public function editDeviation(Request $request, string $eventUuid, string $deviationUuid): Response
+    {
+        $this->denyAccessUnlessGranted('edit_generic');
+
+        /**
+         * @var Event $event
+         */
+        $event = $this->aggregateFactory->build($eventUuid, Event::class);
+        $deviation = $event->getDeviation($deviationUuid);
+
+        /**
+         * @var UserRead $user
+         */
+        $user = $this->getUser();
+
+        $data = [
+            'uuid' => $deviation->uuid,
+            'venue' => $deviation->venue,
+            'participants' => $deviation->participants,
+            'salesStatus' => $deviation->salesStatus,
+            'extra' => $deviation->extra,
+            'startDate' => $deviation->startDate ? $deviation->startDate->getTimestamp() : null,
+            'endDate' => $deviation->endDate ? $deviation->endDate->getTimestamp() : null,
+        ];
+
+        $calendarConfig = $this->getParameter('calendar');
+        $formClass = $calendarConfig['deviation_form_type'];
+        $template = $calendarConfig['deviation_form_template'];
+
+        $ignore_validation = $request->get('ignore_validation');
+        $form = $this->createForm($formClass, $data, [
+            'validation_groups' => $ignore_validation ? false : null,
+        ]);
+        $form->handleRequest($request);
+
+        if (!$ignore_validation && $form->isSubmitted() && $form->isValid()) {
+            $payload = $form->getData();
+
+            $queueEvents = false;
+            $success = $this->commandBus->execute(EventDeviationEditCommand::class, $event->uuid, $payload, $user->getId(), $queueEvents);
+            if ($success) {
+                $this->addFlash(
+                    'success',
+                    $this->translator->trans('Deviation edited', [], 'cms')
+                );
+
+                return $this->redirectToRoute('calendar_event_edit', [
+                    'uuid' => $event->uuid,
+                ]);
+            }
+        }
+
+        return $this->render($template, [
+            'title' => $this->translator->trans('calendar.label.editDeviation', [], 'cms'),
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @Route("/calendar/deviation/{eventUuid}/delete/{deviationUuid}", name="calendar_deviation_delete")
+     *
+     * @param string $eventUuid
+     * @param string $deviationUuid
+     *
+     * @return RedirectResponse
+     * @throws InterfaceException
+     */
+    public function deleteDeviation(string $eventUuid, string $deviationUuid): RedirectResponse
+    {
+        $this->denyAccessUnlessGranted('edit_generic');
+
+        /**
+         * @var Event $event
+         */
+        $event = $this->aggregateFactory->build($eventUuid, Event::class);
+        $deviation = $event->getDeviation($deviationUuid);
+
+        /**
+         * @var UserRead $user
+         */
+        $user = $this->getUser();
+
+        $payload = [
+            'uuid' => $deviation->uuid,
+        ];
+
+        $queueEvents = false;
+        $success = $this->commandBus->execute(EventDeviationDeleteCommand::class, $event->uuid, $payload, $user->getId(), $queueEvents);
+        if ($success) {
+            $this->addFlash(
+                'success',
+                $this->translator->trans('Deviation deleted', [], 'cms')
+            );
+        }
+
+        return $this->redirectToRoute('calendar_event_edit', [
+            'uuid' => $event->uuid,
         ]);
     }
 }

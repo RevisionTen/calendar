@@ -76,26 +76,24 @@ class Event extends Aggregate
         unset($this->rules[$rule->uuid]);
     }
 
-    public function getDeviation(DateTimeInterface $ruleStartDate, DateTimeInterface $ruleEndDate): Deviation
+    public function getDeviation(string $deviationUuid): Deviation
     {
-        $proxyDeviation = new Deviation($ruleStartDate, $ruleEndDate);
-
-        return $this->deviations[$proxyDeviation->getKey()];
+        return $this->deviations[$deviationUuid];
     }
 
     public function addDeviation(Deviation $deviation): void
     {
-        $this->deviations[$deviation->getKey()] = $deviation;
+        $this->deviations[$deviation->uuid] = $deviation;
     }
 
     public function updateDeviation(Deviation $deviation): void
     {
-        $this->deviations[$deviation->getKey()] = $deviation;
+        $this->deviations[$deviation->uuid] = $deviation;
     }
 
     public function deleteDeviation(Deviation $deviation): void
     {
-        unset($this->deviations[$deviation->getKey()]);
+        unset($this->deviations[$deviation->uuid]);
     }
 
     /**
@@ -103,6 +101,9 @@ class Event extends Aggregate
      */
     public function getDates(): array
     {
+        /**
+         * @var Date[] $dates
+         */
         $dates = [];
 
         foreach ($this->rules as $rule) {
@@ -112,6 +113,21 @@ class Event extends Aggregate
         usort($dates, static function(Date $a, Date $b) {
             return $a->startDate->getTimestamp() >= $b->startDate->getTimestamp();
         });
+
+        // Apply deviations.
+        $deviations = [];
+        foreach ($this->deviations as $deviation) {
+            $key = $deviation->deviationStartDate->getTimestamp() . '_' . $deviation->deviationEndDate->getTimestamp();
+            $deviations[$key] = $deviation;
+        }
+
+        foreach ($dates as $date) {
+            $key = $date->startDate->getTimestamp() . '_' . $date->endDate->getTimestamp();
+            if (isset($deviations[$key])) {
+                $date->deviation = $deviations[$key];
+                unset($deviations[$key]);
+            }
+        }
 
         return $dates;
     }

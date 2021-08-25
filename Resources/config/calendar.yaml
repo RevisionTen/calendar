@@ -5,3 +5,5 @@ calendar:
     event_solr_serializer: 'RevisionTen\Calendar\Serializer\EventSerializer' # Must implement RevisionTen\Calendar\Serializer\SolrSerializerInterface
     rule_form_type: 'RevisionTen\Calendar\Form\RuleType'
     rule_form_template: '@Calendar/Admin/rule_form.html.twig'
+    deviation_form_type: 'RevisionTen\Calendar\Form\DeviationType'
+    deviation_form_template: '@Calendar/Admin/deviation_form.html.twig'

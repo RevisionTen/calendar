@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace RevisionTen\Calendar\Event;
 
 use RevisionTen\Calendar\Entity\Event;
-use RevisionTen\Calendar\Handler\EventCreateRuleHandler;
+use RevisionTen\Calendar\Handler\EventDeviationEditHandler;
 use RevisionTen\CQRS\Event\AggregateEvent;
 use RevisionTen\CQRS\Interfaces\EventInterface;
 
-final class EventCreateRuleEvent extends AggregateEvent implements EventInterface
+final class EventDeviationEditEvent extends AggregateEvent implements EventInterface
 {
     public static function getAggregateClass(): string
     {
@@ -18,11 +18,11 @@ final class EventCreateRuleEvent extends AggregateEvent implements EventInterfac
 
     public static function getHandlerClass(): string
     {
-        return EventCreateRuleHandler::class;
+        return EventDeviationEditHandler::class;
     }
 
     public function getMessage(): string
     {
-        return 'Rule created';
+        return 'Deviation edited';
     }
 }

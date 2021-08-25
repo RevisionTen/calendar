@@ -49,4 +49,6 @@ class Date
     public ?DateTimeInterface $startDate = null;
 
     public ?DateTimeInterface $endDate = null;
+
+    public ?Deviation $deviation = null;
 }

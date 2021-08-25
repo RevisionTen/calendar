@@ -7,6 +7,9 @@ Event deleted: "Veranstaltung gelöscht"
 Rule created: "Regel erstellt"
 Rule edited: "Regel bearbeitet"
 Rule deleted: "Regel gelöscht"
+Deviation created: "Ausnahme erstellt"
+Deviation edited: "Ausnahme bearbeitet"
+Deviation deleted: "Ausnahme gelöscht"
 
 calendar:
     label:
@@ -27,7 +30,10 @@ calendar:
         exclusionsTab: "Ausnahmen"
         addRule: "Regel hinzufügen"
         editRule: "Regel bearbeiten"
-        addExclusion: "Ausnahme hinzufügen"
+        deviation: "Ausnahme"
+        editDeviation: "Ausnahme bearbeiten"
+        addDeviation: "Ausnahme hinzufügen"
+        deleteDeviation: "Ausnahme löschen"
         saveFirst: "Sie müssen die Veranstaltung erst speichern"
         ruleTitle: "Regelbezeichnung"
         participants: "Anzahl Teilnehmer"

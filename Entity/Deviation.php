@@ -8,14 +8,16 @@ use DateTimeInterface;
 
 class Deviation
 {
+    public string $uuid;
+
     public DateTimeInterface $deviationStartDate;
 
     public DateTimeInterface $deviationEndDate;
 
 
-    public DateTimeInterface $startDate;
+    public ?DateTimeInterface $startDate = null;
 
-    public DateTimeInterface $endDate;
+    public ?DateTimeInterface $endDate = null;
 
     public ?string $salesStatus = null;
 
@@ -25,14 +27,10 @@ class Deviation
 
     public ?array $extra = null;
 
-    public function __construct(DateTimeInterface $deviationStartDate, DateTimeInterface $deviationEndDate)
+    public function __construct(string $deviationUuid, DateTimeInterface $deviationStartDate, DateTimeInterface $deviationEndDate)
     {
+        $this->uuid = $deviationUuid;
         $this->deviationStartDate = $deviationStartDate;
         $this->deviationEndDate = $deviationEndDate;
-    }
-
-    public function getKey(): string
-    {
-        return $this->deviationStartDate->getTimestamp() . '_' . $this->deviationEndDate->getTimestamp();
     }
 }

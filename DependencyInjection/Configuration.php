@@ -17,6 +17,8 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('event_solr_serializer')->end()
                 ->scalarNode('rule_form_type')->end()
                 ->scalarNode('rule_form_template')->end()
+                ->scalarNode('deviation_form_type')->end()
+                ->scalarNode('deviation_form_template')->end()
             ->end();
 
         return $treeBuilder;
