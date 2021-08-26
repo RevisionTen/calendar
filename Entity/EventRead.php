@@ -8,6 +8,7 @@ use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use RevisionTen\CMS\Traits\LanguageAndWebsiteTrait;
 use RevisionTen\CMS\Traits\ReadModelTrait;
+use RevisionTen\CQRS\Interfaces\AggregateInterface;
 
 /**
  * @ORM\Entity
@@ -45,4 +46,29 @@ class EventRead
      * @ORM\Column(type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     public ?DateTimeInterface $modified = null;
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private ?string $dates = null;
+
+    /**
+     * @return Date[]
+     */
+    public function getDates(): array
+    {
+        return $this->dates && is_string($this->dates) ? unserialize($this->dates, ['allowed_classes' => true]) : [];
+    }
+
+    public function setDates(Event $event): self
+    {
+        $datesWithDeviations = [];
+        $dates = $event->getDates();
+        foreach ($dates as $date) {
+            $datesWithDeviations[] = $date->getDateWithDeviation();
+        }
+        $this->dates = serialize($datesWithDeviations);
+
+        return $this;
+    }
 }

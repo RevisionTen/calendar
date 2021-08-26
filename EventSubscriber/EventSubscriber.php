@@ -6,7 +6,13 @@ namespace RevisionTen\Calendar\EventSubscriber;
 
 use RevisionTen\Calendar\Event\EventCreateEvent;
 use RevisionTen\Calendar\Event\EventDeleteEvent;
+use RevisionTen\Calendar\Event\EventDeviationCreateEvent;
+use RevisionTen\Calendar\Event\EventDeviationDeleteEvent;
+use RevisionTen\Calendar\Event\EventDeviationEditEvent;
 use RevisionTen\Calendar\Event\EventEditEvent;
+use RevisionTen\Calendar\Event\EventRuleCreateEvent;
+use RevisionTen\Calendar\Event\EventRuleDeleteEvent;
+use RevisionTen\Calendar\Event\EventRuleEditEvent;
 use RevisionTen\Calendar\Services\CalendarService;
 use RevisionTen\CQRS\Interfaces\EventInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -23,9 +29,15 @@ class EventSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            EventCreateEvent::class => 'create',
-            EventEditEvent::class => 'edit',
-            EventDeleteEvent::class => 'delete',
+            EventCreateEvent::class => 'updateReadModel',
+            EventEditEvent::class => 'updateReadModel',
+            EventDeleteEvent::class => 'updateReadModel',
+            EventRuleCreateEvent::class => 'updateReadModel',
+            EventRuleEditEvent::class => 'updateReadModel',
+            EventRuleDeleteEvent::class => 'updateReadModel',
+            EventDeviationCreateEvent::class => 'updateReadModel',
+            EventDeviationEditEvent::class => 'updateReadModel',
+            EventDeviationDeleteEvent::class => 'updateReadModel',
         ];
     }
 
@@ -33,20 +45,5 @@ class EventSubscriber implements EventSubscriberInterface
     {
         $this->calendarService->updateReadModel($event->getAggregateUuid());
         $this->calendarService->indexEvent($event->getAggregateUuid());
-    }
-
-    public function create(EventCreateEvent $event): void
-    {
-        $this->updateReadModel($event);
-    }
-
-    public function edit(EventEditEvent $event): void
-    {
-        $this->updateReadModel($event);
-    }
-
-    public function delete(EventDeleteEvent $event): void
-    {
-        $this->updateReadModel($event);
     }
 }

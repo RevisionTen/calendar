@@ -107,6 +107,7 @@ class CalendarService extends IndexService
         $eventRead->setUuid($aggregateUuid);
         $fileData = json_decode(json_encode($aggregate), true);
         $eventRead->setPayload($fileData);
+        $eventRead->setDates($aggregate);
         $eventRead->setWebsite($website);
         $eventRead->setLanguage($aggregate->language);
 
@@ -118,6 +119,7 @@ class CalendarService extends IndexService
 
         $this->entityManager->persist($eventRead);
         $this->entityManager->flush();
+        $this->entityManager->clear();
 
         // Save snapshot.
         if ($aggregate->getSnapshotVersion() <= ($aggregate->getVersion() - 10)) {
