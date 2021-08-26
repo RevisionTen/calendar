@@ -14,6 +14,7 @@ use RevisionTen\CMS\Entity\Website;
 use RevisionTen\CMS\Services\IndexService;
 use RevisionTen\CMS\Services\PageService;
 use RevisionTen\CQRS\Services\AggregateFactory;
+use RevisionTen\CQRS\Services\SnapshotStore;
 use Solarium\Core\Client\Adapter\Curl;
 use Solarium\Core\Client\Client;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -24,15 +25,18 @@ class CalendarService extends IndexService
 {
     protected AggregateFactory $aggregateFactory;
 
+    protected SnapshotStore $snapshotStore;
+
     protected array $calendarConfig;
 
     protected ContainerInterface $container;
 
-    public function __construct(ContainerInterface $container, LoggerInterface $logger, EntityManagerInterface $entityManager, PageService $pageService, array $config, AggregateFactory $aggregateFactory, array $calendarConfig)
+    public function __construct(ContainerInterface $container, LoggerInterface $logger, EntityManagerInterface $entityManager, PageService $pageService, array $config, AggregateFactory $aggregateFactory, SnapshotStore $snapshotStore, array $calendarConfig)
     {
         parent::__construct($container, $logger, $entityManager, $pageService, $config);
 
         $this->aggregateFactory = $aggregateFactory;
+        $this->snapshotStore = $snapshotStore;
         $this->calendarConfig = $calendarConfig;
         $this->container = $container;
     }
@@ -114,5 +118,10 @@ class CalendarService extends IndexService
 
         $this->entityManager->persist($eventRead);
         $this->entityManager->flush();
+
+        // Save snapshot.
+        if ($aggregate->getSnapshotVersion() <= ($aggregate->getVersion() - 10)) {
+            $this->snapshotStore->save($aggregate);
+        }
     }
 }
