@@ -18,16 +18,28 @@ framework:
             - '%kernel.project_dir%/vendor/revision-ten/calendar/Resources/translations'
 
 cms:
+    permissions:
+        Calendar:
+            list_calendar_event:
+                label: 'List Event'
+            search_calendar_event:
+                label: 'Search Event'
+            create_calendar_event:
+                label: 'Create Event'
+            edit_calendar_event:
+                label: 'Edit Event'
+            delete_calendar_event:
+                label: 'Delete Event'
     entities:
         EventRead:
             label: 'calendar.label.events'
             class: RevisionTen\Calendar\Entity\EventRead
             permissions:
-                list: 'list_generic'
-                search: 'search_generic'
-                create: 'create_generic'
-                edit: 'edit_generic'
-                delete: 'delete_generic'
+                list: 'list_calendar_event'
+                search: 'search_calendar_event'
+                create: 'create_calendar_event'
+                edit: 'edit_calendar_event'
+                delete: 'delete_calendar_event'
             templates:
                 list: '@Calendar/Admin/list.html.twig'
             list:
@@ -45,5 +57,5 @@ cms:
                     - '-create'
                     - '-edit'
                     - '-delete'
-                    - { route: 'calendar_event_edit', label: 'admin.btn.edit', icon: 'fas fa-edit', permission: 'edit_generic' }
-                    - { route: 'calendar_event_delete', label: 'admin.btn.delete', icon: 'fas fa-trash', css_class: 'text-danger', permission: 'delete_generic' }
+                    - { route: 'calendar_event_edit', label: 'admin.btn.edit', icon: 'fas fa-edit', permission: 'edit_calendar_event' }
+                    - { route: 'calendar_event_delete', label: 'admin.btn.delete', icon: 'fas fa-trash', css_class: 'text-danger', permission: 'delete_calendar_event' }

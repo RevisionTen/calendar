@@ -60,7 +60,7 @@ class AdminController extends AbstractController
      */
     public function createEvent(Request $request): Response
     {
-        $this->denyAccessUnlessGranted('create_generic');
+        $this->denyAccessUnlessGranted('create_calendar_event');
 
         /**
          * @var UserRead $user
@@ -119,7 +119,7 @@ class AdminController extends AbstractController
      */
     public function editEvent(Request $request): Response
     {
-        $this->denyAccessUnlessGranted('edit_generic');
+        $this->denyAccessUnlessGranted('edit_calendar_event');
 
         $eventUuid = $request->get('uuid');
         if (empty($eventUuid)) {
@@ -205,7 +205,7 @@ class AdminController extends AbstractController
      */
     public function deleteEvent(Request $request): Response
     {
-        $this->denyAccessUnlessGranted('delete_generic');
+        $this->denyAccessUnlessGranted('delete_calendar_event');
 
         $id = (int) $request->get('id');
         /**
@@ -240,7 +240,7 @@ class AdminController extends AbstractController
      */
     public function createRule(Request $request, string $eventUuid): Response
     {
-        $this->denyAccessUnlessGranted('edit_generic');
+        $this->denyAccessUnlessGranted('edit_calendar_event');
 
         /**
          * @var Event $event
@@ -302,7 +302,7 @@ class AdminController extends AbstractController
      */
     public function editRule(Request $request, string $eventUuid, string $ruleUuid): Response
     {
-        $this->denyAccessUnlessGranted('edit_generic');
+        $this->denyAccessUnlessGranted('edit_calendar_event');
 
         /**
          * @var Event $event
@@ -381,7 +381,7 @@ class AdminController extends AbstractController
      */
     public function deleteRule(string $eventUuid, string $ruleUuid): RedirectResponse
     {
-        $this->denyAccessUnlessGranted('edit_generic');
+        $this->denyAccessUnlessGranted('edit_calendar_event');
 
         /**
          * @var Event $event
@@ -423,7 +423,7 @@ class AdminController extends AbstractController
      */
     public function createDeviation(Request $request, string $eventUuid, int $start, int $end): Response
     {
-        $this->denyAccessUnlessGranted('edit_generic');
+        $this->denyAccessUnlessGranted('edit_calendar_event');
 
         /**
          * @var Event $event
@@ -485,7 +485,7 @@ class AdminController extends AbstractController
      */
     public function editDeviation(Request $request, string $eventUuid, string $deviationUuid): Response
     {
-        $this->denyAccessUnlessGranted('edit_generic');
+        $this->denyAccessUnlessGranted('edit_calendar_event');
 
         /**
          * @var Event $event
@@ -552,7 +552,7 @@ class AdminController extends AbstractController
      */
     public function deleteDeviation(string $eventUuid, string $deviationUuid): RedirectResponse
     {
-        $this->denyAccessUnlessGranted('edit_generic');
+        $this->denyAccessUnlessGranted('edit_calendar_event');
 
         /**
          * @var Event $event
