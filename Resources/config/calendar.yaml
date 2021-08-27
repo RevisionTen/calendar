@@ -1,5 +1,6 @@
 
 calendar:
+    event_frontend_controller: 'App\Controller\EventController::show'
     event_form_type: 'RevisionTen\Calendar\Form\EventType'
     event_form_template: '@Calendar/Admin/event_form.html.twig'
     event_solr_serializer: 'RevisionTen\Calendar\Serializer\EventSerializer' # Must implement RevisionTen\Calendar\Serializer\SolrSerializerInterface

@@ -6,9 +6,9 @@ namespace RevisionTen\Calendar\Entity;
 
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
+use RevisionTen\CMS\Entity\Alias;
 use RevisionTen\CMS\Traits\LanguageAndWebsiteTrait;
 use RevisionTen\CMS\Traits\ReadModelTrait;
-use RevisionTen\CQRS\Interfaces\AggregateInterface;
 
 /**
  * @ORM\Entity
@@ -21,6 +21,12 @@ class EventRead
 {
     use ReadModelTrait;
     use LanguageAndWebsiteTrait;
+
+    /**
+     * @ORM\OneToOne(targetEntity="RevisionTen\CMS\Entity\Alias", cascade={"persist", "remove"}))
+     * @ORM\JoinColumn(onDelete="SET NULL", nullable=true)
+     */
+    private ?Alias $alias = null;
 
     /**
      * @ORM\Column(type="boolean", options={"default": 0})
@@ -52,6 +58,11 @@ class EventRead
      */
     private ?string $dates = null;
 
+    public function __construct()
+    {
+        $this->alias = new Alias();
+    }
+
     /**
      * @return Date[]
      */
@@ -68,6 +79,18 @@ class EventRead
             $datesWithDeviations[] = $date->getDateWithDeviation();
         }
         $this->dates = serialize($datesWithDeviations);
+
+        return $this;
+    }
+
+    public function getAlias(): ?Alias
+    {
+        return $this->alias;
+    }
+
+    public function setAlias(?Alias $alias): EventRead
+    {
+        $this->alias = $alias;
 
         return $this;
     }

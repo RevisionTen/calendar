@@ -12,6 +12,7 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder('calendar');
         $treeBuilder->getRootNode()
             ->children()
+                ->scalarNode('event_frontend_controller')->end()
                 ->scalarNode('event_form_type')->end()
                 ->scalarNode('event_form_template')->end()
                 ->scalarNode('event_solr_serializer')->end()

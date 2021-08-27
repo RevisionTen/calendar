@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace RevisionTen\Calendar\Services;
 
+use Cocur\Slugify\Slugify;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use RevisionTen\Calendar\Entity\Event;
 use RevisionTen\Calendar\Entity\EventRead;
 use RevisionTen\Calendar\Serializer\EventSerializer;
 use RevisionTen\Calendar\Serializer\SolrSerializerInterface;
+use RevisionTen\CMS\Entity\Alias;
 use RevisionTen\CMS\Entity\Website;
 use RevisionTen\CMS\Services\IndexService;
 use RevisionTen\CMS\Services\PageService;
@@ -116,6 +118,32 @@ class CalendarService extends IndexService
         $eventRead->salesStatus = $aggregate->salesStatus;
         $eventRead->created = $aggregate->created;
         $eventRead->modified = $aggregate->modified;
+
+        if ($eventRead->deleted) {
+            $alias = $eventRead->getAlias();
+            if (null !== $alias) {
+                $eventRead->setAlias(null);
+                $this->entityManager->remove($alias);
+            }
+        } else {
+            $slugify = new Slugify();
+            $hash = $slugify->slugify(hash('crc32', $aggregate->uuid));
+            if (!empty($aggregate->genres) && is_array($aggregate->genres)) {
+                $slug = '/' . $slugify->slugify(implode('-', $aggregate->genres)) . '/' . $slugify->slugify($aggregate->title) . '-' . $hash;
+            } else {
+                $slug = '/' . $slugify->slugify($aggregate->title) . '-' . $hash;
+            }
+            $alias = $eventRead->getAlias();
+            if (null === $alias) {
+                $alias = new Alias();
+            }
+            $controller = $this->calendarConfig['event_frontend_controller'] ?? null;
+            $alias->setController($controller);
+            $alias->setWebsite($website);
+            $alias->setLanguage($aggregate->language);
+            $alias->setPath($slug);
+            $eventRead->setAlias($alias);
+        }
 
         $this->entityManager->persist($eventRead);
         $this->entityManager->flush();
