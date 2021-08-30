@@ -10,13 +10,14 @@ use RevisionTen\Calendar\Command\EventCreateCommand;
 use RevisionTen\Calendar\Command\EventDeviationCreateCommand;
 use RevisionTen\Calendar\Command\EventDeviationDeleteCommand;
 use RevisionTen\Calendar\Command\EventDeviationEditCommand;
+use RevisionTen\Calendar\Command\EventPublishCommand;
 use RevisionTen\Calendar\Command\EventRuleCreateCommand;
 use RevisionTen\Calendar\Command\EventDeleteCommand;
 use RevisionTen\Calendar\Command\EventEditCommand;
 use RevisionTen\Calendar\Command\EventRuleDeleteCommand;
 use RevisionTen\Calendar\Command\EventRuleEditCommand;
 use RevisionTen\Calendar\Entity\Event;
-use RevisionTen\Calendar\Entity\EventRead;
+use RevisionTen\Calendar\Entity\EventStreamRead;
 use RevisionTen\CMS\Model\UserRead;
 use RevisionTen\CQRS\Exception\InterfaceException;
 use RevisionTen\CQRS\Services\AggregateFactory;
@@ -125,13 +126,13 @@ class AdminController extends AbstractController
         if (empty($eventUuid)) {
             $id = (int) $request->get('id');
             /**
-             * @var EventRead $eventRead
+             * @var EventStreamRead $eventStreamRead
              */
-            $eventRead = $this->entityManager->getRepository(EventRead::class)->find($id);
-            if (null === $eventRead) {
+            $eventStreamRead = $this->entityManager->getRepository(EventStreamRead::class)->find($id);
+            if (null === $eventStreamRead) {
                 throw new NotFoundHttpException();
             }
-            $eventUuid = $eventRead->getUuid();
+            $eventUuid = $eventStreamRead->getUuid();
         }
 
         if (empty($eventUuid)) {
@@ -184,6 +185,10 @@ class AdminController extends AbstractController
                     'success',
                     $this->translator->trans('Event edited', [], 'cms')
                 );
+
+                return $this->redirectToRoute('calendar_event_edit', [
+                    'uuid' => $event->getUuid(),
+                ]);
             }
         }
 
@@ -209,13 +214,13 @@ class AdminController extends AbstractController
 
         $id = (int) $request->get('id');
         /**
-         * @var EventRead $eventRead
+         * @var EventStreamRead $eventStreamRead
          */
-        $eventRead = $this->entityManager->getRepository(EventRead::class)->find($id);
-        if (null === $eventRead) {
+        $eventStreamRead = $this->entityManager->getRepository(EventStreamRead::class)->find($id);
+        if (null === $eventStreamRead) {
             throw new NotFoundHttpException();
         }
-        $eventUuid = $eventRead->getUuid();
+        $eventUuid = $eventStreamRead->getUuid();
 
         /**
          * @var UserRead $user
@@ -225,7 +230,36 @@ class AdminController extends AbstractController
         $this->commandBus->execute(EventDeleteCommand::class, $eventUuid, [], $user->getId(), false);
 
         return $this->redirectToRoute('cms_list_entity', [
-            'entity' => 'EventRead',
+            'entity' => 'EventStreamRead',
+        ]);
+    }
+
+    /**
+     * @Route("/calendar/publish/{eventUuid}", name="calendar_event_publish")
+     *
+     * @param string $eventUuid
+     *
+     * @return Response
+     * @throws InterfaceException
+     */
+    public function publishEvent(string $eventUuid): Response
+    {
+        $this->denyAccessUnlessGranted('publish_calendar_event');
+
+        /**
+         * @var Event $event
+         */
+        $event = $this->aggregateFactory->build($eventUuid, Event::class);
+
+        /**
+         * @var UserRead $user
+         */
+        $user = $this->getUser();
+
+        $this->commandBus->execute(EventPublishCommand::class, $event->getUuid(), [], $user->getId(), false);
+
+        return $this->redirectToRoute('calendar_event_edit', [
+            'uuid' => $event->getUuid(),
         ]);
     }
 

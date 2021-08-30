@@ -96,12 +96,19 @@
                 <div class="col-4 text-center d-flex justify-content-center">
                     {{ block('tabs') }}
                 </div>
-                {% set typeOptions = { attr: { class: 'btn btn-primary btn-sm' } } %}
-                {% if form.save is defined %}
-                    <div class="col-auto ms-auto content-actions">
+                <div class="col-auto ms-auto content-actions">
+                    {% if is_granted('publish_calendar_event') %}
+                        {% if event.getVersion() != event.publishedVersion %}
+                            <a href="{{ path('calendar_event_publish', { eventUuid: event.uuid }) }}" class="btn btn-success btn-sm">
+                                {{ 'calendar.label.publishEvent'|trans({}, 'cms') }}
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                    {% set typeOptions = { attr: { class: 'btn btn-primary btn-sm' } } %}
+                    {% if form.save is defined %}
                         {{ form_widget(form.save, typeOptions) }}
-                    </div>
-                {% endif %}
+                    {% endif %}
+                </div>
             </div>
         </div>
         {{ block('messages') }}

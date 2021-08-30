@@ -30,10 +30,12 @@ cms:
                 label: 'Edit Event'
             delete_calendar_event:
                 label: 'Delete Event'
+            publish_calendar_event:
+                label: 'Publish Event'
     entities:
-        EventRead:
+        EventStreamRead:
             label: 'calendar.label.events'
-            class: RevisionTen\Calendar\Entity\EventRead
+            class: RevisionTen\Calendar\Entity\EventStreamRead
             permissions:
                 list: 'list_calendar_event'
                 search: 'search_calendar_event'

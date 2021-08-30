@@ -10,6 +10,7 @@ use RevisionTen\Calendar\Event\EventDeviationCreateEvent;
 use RevisionTen\Calendar\Event\EventDeviationDeleteEvent;
 use RevisionTen\Calendar\Event\EventDeviationEditEvent;
 use RevisionTen\Calendar\Event\EventEditEvent;
+use RevisionTen\Calendar\Event\EventPublishEvent;
 use RevisionTen\Calendar\Event\EventRuleCreateEvent;
 use RevisionTen\Calendar\Event\EventRuleDeleteEvent;
 use RevisionTen\Calendar\Event\EventRuleEditEvent;
@@ -31,7 +32,8 @@ class EventSubscriber implements EventSubscriberInterface
         return [
             EventCreateEvent::class => 'updateReadModel',
             EventEditEvent::class => 'updateReadModel',
-            EventDeleteEvent::class => 'updateReadModel',
+            EventDeleteEvent::class => 'deleteEvent',
+            EventPublishEvent::class => 'publishEvent',
             EventRuleCreateEvent::class => 'updateReadModel',
             EventRuleEditEvent::class => 'updateReadModel',
             EventRuleDeleteEvent::class => 'updateReadModel',
@@ -41,9 +43,22 @@ class EventSubscriber implements EventSubscriberInterface
         ];
     }
 
-    public function updateReadModel(EventInterface $event): void
+    public function publishEvent(EventInterface $event): void
     {
+        $this->calendarService->updateStreamReadModel($event->getAggregateUuid());
         $this->calendarService->updateReadModel($event->getAggregateUuid());
         $this->calendarService->indexEvent($event->getAggregateUuid());
+    }
+
+    public function deleteEvent(EventInterface $event): void
+    {
+        $this->calendarService->updateStreamReadModel($event->getAggregateUuid());
+        $this->calendarService->updateReadModel($event->getAggregateUuid());
+        $this->calendarService->indexEvent($event->getAggregateUuid());
+    }
+
+    public function updateReadModel(EventInterface $event): void
+    {
+        $this->calendarService->updateStreamReadModel($event->getAggregateUuid());
     }
 }

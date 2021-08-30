@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace RevisionTen\Calendar\Handler;
 
-use RevisionTen\Calendar\Event\EventDeleteEvent;
+use RevisionTen\Calendar\Event\EventPublishEvent;
 use RevisionTen\Calendar\Entity\Event;
 use RevisionTen\CQRS\Interfaces\AggregateInterface;
 use RevisionTen\CQRS\Interfaces\CommandInterface;
 use RevisionTen\CQRS\Interfaces\EventInterface;
 use RevisionTen\CQRS\Interfaces\HandlerInterface;
 
-final class EventDeleteHandler implements HandlerInterface
+final class EventPublishHandler implements HandlerInterface
 {
     /**
      * {@inheritdoc}
@@ -20,15 +20,14 @@ final class EventDeleteHandler implements HandlerInterface
      */
     public function execute(EventInterface $event, AggregateInterface $aggregate): AggregateInterface
     {
-        $aggregate->deleted = true;
-        $aggregate->publishedVersion = null;
+        $aggregate->publishedVersion = $event->getVersion();
 
         return $aggregate;
     }
 
     public function createEvent(CommandInterface $command): EventInterface
     {
-        return new EventDeleteEvent(
+        return new EventPublishEvent(
             $command->getAggregateUuid(),
             $command->getUuid(),
             $command->getOnVersion() + 1,

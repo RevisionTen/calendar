@@ -18,6 +18,8 @@ class Event extends Aggregate
 
     public ?int $website = null;
 
+    public ?int $publishedVersion = null;
+
     public ?string $language = null;
 
     public bool $deleted = false;

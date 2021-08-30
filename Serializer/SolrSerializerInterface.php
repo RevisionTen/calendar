@@ -10,5 +10,5 @@ use Solarium\QueryType\Update\Query\Query;
 
 interface SolrSerializerInterface
 {
-    public function serialize(Query $update, Event $event, EventRead $eventRead): array;
+    public function serialize(Query $update, Event $event, ?EventRead $eventRead = null): array;
 }

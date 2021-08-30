@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use RevisionTen\Calendar\Entity\Event;
 use RevisionTen\Calendar\Entity\EventRead;
+use RevisionTen\Calendar\Entity\EventStreamRead;
 use RevisionTen\Calendar\Serializer\EventSerializer;
 use RevisionTen\Calendar\Serializer\SolrSerializerInterface;
 use RevisionTen\CMS\Entity\Alias;
@@ -56,7 +57,7 @@ class CalendarService extends IndexService
         $event = $this->aggregateFactory->build($aggregateUuid, Event::class);
 
         /**
-         * @var EventRead $eventRead
+         * @var EventRead|null $eventRead
          */
         $eventRead = $this->entityManager->getRepository(EventRead::class)->findOneBy([
             'uuid' => $aggregateUuid,
@@ -92,7 +93,7 @@ class CalendarService extends IndexService
         $client->update($update);
     }
 
-    public function updateReadModel(string $aggregateUuid): void
+    public function updateStreamReadModel(string $aggregateUuid): void
     {
         /**
          * @var Event $aggregate
@@ -104,48 +105,25 @@ class CalendarService extends IndexService
          */
         $website = $aggregate->website ? $this->entityManager->getRepository(Website::class)->find($aggregate->website) : null;
 
-        $eventRead = $this->entityManager->getRepository(EventRead::class)->findOneBy(['uuid' => $aggregateUuid]) ?? new EventRead();
-        $eventRead->setVersion($aggregate->getStreamVersion());
-        $eventRead->setUuid($aggregateUuid);
+        $eventStreamRead = $this->entityManager->getRepository(EventStreamRead::class)->findOneBy(['uuid' => $aggregateUuid]) ?? new EventStreamRead();
+        $eventStreamRead->setVersion($aggregate->getStreamVersion());
+        $eventStreamRead->setUuid($aggregateUuid);
+
         $fileData = json_decode(json_encode($aggregate), true);
-        $eventRead->setPayload($fileData);
-        $eventRead->setDates($aggregate);
-        $eventRead->setWebsite($website);
-        $eventRead->setLanguage($aggregate->language);
+        $eventStreamRead->setPayload($fileData);
 
-        $eventRead->title = $aggregate->title;
-        $eventRead->deleted = $aggregate->deleted;
-        $eventRead->salesStatus = $aggregate->salesStatus;
-        $eventRead->created = $aggregate->created;
-        $eventRead->modified = $aggregate->modified;
+        $eventStreamRead->setDates($aggregate);
+        $eventStreamRead->setWebsite($website);
+        $eventStreamRead->setLanguage($aggregate->language);
 
-        if ($eventRead->deleted) {
-            $alias = $eventRead->getAlias();
-            if (null !== $alias) {
-                $eventRead->setAlias(null);
-                $this->entityManager->remove($alias);
-            }
-        } else {
-            $slugify = new Slugify();
-            $hash = $slugify->slugify(hash('crc32', $aggregate->uuid));
-            if (!empty($aggregate->genres) && is_array($aggregate->genres)) {
-                $slug = '/' . $slugify->slugify(implode('-', $aggregate->genres)) . '/' . $slugify->slugify($aggregate->title) . '-' . $hash;
-            } else {
-                $slug = '/' . $slugify->slugify($aggregate->title) . '-' . $hash;
-            }
-            $alias = $eventRead->getAlias();
-            if (null === $alias) {
-                $alias = new Alias();
-            }
-            $controller = $this->calendarConfig['event_frontend_controller'] ?? null;
-            $alias->setController($controller);
-            $alias->setWebsite($website);
-            $alias->setLanguage($aggregate->language);
-            $alias->setPath($slug);
-            $eventRead->setAlias($alias);
-        }
+        $eventStreamRead->publishedVersion = $aggregate->publishedVersion;
+        $eventStreamRead->title = $aggregate->title;
+        $eventStreamRead->deleted = $aggregate->deleted;
+        $eventStreamRead->salesStatus = $aggregate->salesStatus;
+        $eventStreamRead->created = $aggregate->created;
+        $eventStreamRead->modified = $aggregate->modified;
 
-        $this->entityManager->persist($eventRead);
+        $this->entityManager->persist($eventStreamRead);
         $this->entityManager->flush();
         $this->entityManager->clear();
 
@@ -153,5 +131,68 @@ class CalendarService extends IndexService
         if ($aggregate->getSnapshotVersion() <= ($aggregate->getVersion() - 10)) {
             $this->snapshotStore->save($aggregate);
         }
+    }
+
+    public function updateReadModel(string $aggregateUuid): void
+    {
+        /**
+         * @var Event $aggregate
+         */
+        $aggregate = $this->aggregateFactory->build($aggregateUuid, Event::class);
+
+        if ($aggregate->deleted) {
+            // Delete EventRead and Alias.
+            $oldEventRead = $this->entityManager->getRepository(EventRead::class)->findOneBy(['uuid' => $aggregateUuid]);
+            if ($oldEventRead) {
+                $oldAlias = $oldEventRead->getAlias();
+                if (null !== $oldAlias) {
+                    $oldEventRead->setAlias(null);
+                    $this->entityManager->remove($oldAlias);
+                }
+                $this->entityManager->remove($oldEventRead);
+                $this->entityManager->flush();
+                $this->entityManager->clear();
+
+                return;
+            }
+        }
+
+        /**
+         * @var Website|null $website
+         */
+        $website = $aggregate->website ? $this->entityManager->getRepository(Website::class)->find($aggregate->website) : null;
+
+        $eventRead = $this->entityManager->getRepository(EventRead::class)->findOneBy(['uuid' => $aggregateUuid]) ?? new EventRead();
+        $eventRead->setVersion($aggregate->getStreamVersion());
+        $eventRead->setUuid($aggregateUuid);
+        $eventRead->setDates($aggregate);
+        $eventRead->setWebsite($website);
+        $eventRead->setLanguage($aggregate->language);
+
+        $fileData = json_decode(json_encode($aggregate), true);
+        $eventRead->setPayload($fileData);
+
+        // Update alias.
+        $slugify = new Slugify();
+        $hash = $slugify->slugify(hash('crc32', $aggregate->uuid));
+        if (!empty($aggregate->genres) && is_array($aggregate->genres)) {
+            $slug = '/' . $slugify->slugify(implode('-', $aggregate->genres)) . '/' . $slugify->slugify($aggregate->title) . '-' . $hash;
+        } else {
+            $slug = '/' . $slugify->slugify($aggregate->title) . '-' . $hash;
+        }
+        $alias = $eventRead->getAlias();
+        if (null === $alias) {
+            $alias = new Alias();
+        }
+        $controller = $this->calendarConfig['event_frontend_controller'] ?? null;
+        $alias->setController($controller);
+        $alias->setWebsite($website);
+        $alias->setLanguage($aggregate->language);
+        $alias->setPath($slug);
+        $eventRead->setAlias($alias);
+
+        $this->entityManager->persist($eventRead);
+        $this->entityManager->flush();
+        $this->entityManager->clear();
     }
 }

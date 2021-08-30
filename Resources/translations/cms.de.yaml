@@ -1,9 +1,11 @@
 EventRead: "Veranstaltung"
+EventStreamRead: "Veranstaltung"
 
 # Events.
 Event created: "Veranstaltung erstellt"
 Event edited: "Veranstaltung bearbeitet"
 Event deleted: "Veranstaltung gelöscht"
+Event published: "Veranstaltung veröffentlicht"
 Rule created: "Regel erstellt"
 Rule edited: "Regel bearbeitet"
 Rule deleted: "Regel gelöscht"
@@ -17,6 +19,7 @@ calendar:
         events: "Veranstaltungen"
         createEvent: "Veranstaltung erstellen"
         editEvent: "Veranstaltung bearbeiten"
+        publishEvent: "Veranstaltung veröffentlichen"
         organizer: "Veranstalter"
         artist: "Künstler"
         description: "Beschreibung"
@@ -27,7 +30,7 @@ calendar:
         partners: "Partner"
         venue: "Ort"
         basicTab: "Basisdaten"
-        rulesTab: "Wiederholungsregeln"
+        rulesTab: "Terminregeln"
         exclusionsTab: "Ausnahmen"
         addRule: "Regel hinzufügen"
         editRule: "Regel bearbeiten"
