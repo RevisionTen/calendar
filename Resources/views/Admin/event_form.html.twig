@@ -3,17 +3,20 @@
 
 {% set edit = edit is defined and edit %}
 
+{% set activeTab = app.request.get('tab') ?? 'basic' %}
+
 {% block tabs %}
+
     <ul class="btn-group nav nav-pills" role="tablist">
         <li class="btn-group nav-item" role="presentation">
-            <button class="btn-tab btn btn-sm btn-light active" data-bs-toggle="tab" data-bs-target="#basic" type="button" role="tab" aria-controls="basic" aria-selected="true">
+            <button class="btn-tab btn btn-sm btn-light {{ activeTab == 'basic' ? 'active' : '' }}" data-bs-toggle="tab" data-bs-target="#basic" type="button" role="tab" aria-controls="basic" aria-selected="{{ activeTab == 'basic' ? 'true' : 'false' }}">
                 {{ 'calendar.label.basicTab'|trans({}, 'cms') }}
             </button>
         </li>
 
         {% if edit %}
             <li class="btn-group nav-item" role="presentation">
-                <button class="btn-tab btn btn-sm btn-light" data-bs-toggle="tab" data-bs-target="#rules" type="button" role="tab" aria-controls="rules" aria-selected="false">
+                <button class="btn-tab btn btn-sm btn-light {{ activeTab == 'rules' ? 'active' : '' }}" data-bs-toggle="tab" data-bs-target="#rules" type="button" role="tab" aria-controls="rules" aria-selected="{{ activeTab == 'rules' ? 'true' : 'false' }}">
                     {{ 'calendar.label.rulesTab'|trans({}, 'cms') }}
                 </button>
             </li>
@@ -27,7 +30,7 @@
 
         {% if edit %}
             <li class="btn-group nav-item" role="presentation">
-                <button class="btn-tab btn btn-sm btn-light" data-bs-toggle="tab" data-bs-target="#exclusions" type="button" role="tab" aria-controls="exclusions" aria-selected="false">
+                <button class="btn-tab btn btn-sm btn-light {{ activeTab == 'exclusions' ? 'active' : '' }}" data-bs-toggle="tab" data-bs-target="#exclusions" type="button" role="tab" aria-controls="exclusions" aria-selected="{{ activeTab == 'exclusions' ? 'true' : 'false' }}">
                     {{ 'calendar.label.exclusionsTab'|trans({}, 'cms') }}
                 </button>
             </li>
@@ -82,7 +85,7 @@
 
     {{ form_start(form, {
         attr: {
-            class: 'show active content-form ' ~ tabClass,
+            class: 'content-form ' ~ tabClass ~ (activeTab == 'basic' ? ' show active' : ''),
             style: 'max-height: 100vh',
             id: 'basic',
             role: 'tabpanel',
@@ -97,6 +100,10 @@
                     {{ block('tabs') }}
                 </div>
                 <div class="col-auto ms-auto content-actions">
+                    {% set typeOptions = { attr: { class: 'btn btn-primary btn-sm' } } %}
+                    {% if form.save is defined %}
+                        {{ form_widget(form.save, typeOptions) }}
+                    {% endif %}
                     {% if is_granted('publish_calendar_event') %}
                         {% if event.getVersion() != event.publishedVersion %}
                             <a href="{{ path('calendar_event_publish', { eventUuid: event.uuid }) }}" class="btn btn-success btn-sm">
@@ -104,14 +111,12 @@
                             </a>
                         {% endif %}
                     {% endif %}
-                    {% set typeOptions = { attr: { class: 'btn btn-primary btn-sm' } } %}
-                    {% if form.save is defined %}
-                        {{ form_widget(form.save, typeOptions) }}
-                    {% endif %}
                 </div>
             </div>
         </div>
-        {{ block('messages') }}
+        {% if activeTab == 'basic' %}
+            {{ block('messages') }}
+        {% endif %}
         {{ block('content') }}
     {{ form_end(form) }}
 
@@ -119,7 +124,7 @@
 
         {% set cssClass = 'p-4 py-2' %}
 
-        <div id="rules" role="tabpanel" class="{{ tabClass }}" style="max-height: 100vh;">
+        <div id="rules" role="tabpanel" class="{{ tabClass ~ (activeTab == 'rules' ? ' show active' : '') }}" style="max-height: 100vh;">
             <div class="sticky-top px-4 py-3 {{ contentHeaderClass }}">
                 <div class="row align-items-center">
                     <div class="col-4 fw-bold content-title">
@@ -132,11 +137,20 @@
                         <a href="{{ path('calendar_rule_create', { eventUuid: event.uuid }) }}" class="btn btn-sm btn-primary">
                             <span class="fas fa-plus"></span> {{ 'calendar.label.addRule'|trans({}, 'cms') }}
                         </a>
+                        {% if is_granted('publish_calendar_event') %}
+                            {% if event.getVersion() != event.publishedVersion %}
+                                <a href="{{ path('calendar_event_publish', { eventUuid: event.uuid }) }}" class="btn btn-success btn-sm">
+                                    {{ 'calendar.label.publishEvent'|trans({}, 'cms') }}
+                                </a>
+                            {% endif %}
+                        {% endif %}
                     </div>
                 </div>
             </div>
+            {% if activeTab == 'rules' %}
+                {{ block('messages') }}
+            {% endif %}
             <div>
-
                 <table class="my-0 table table-hover small">
                     <thead>
                     <tr>
@@ -205,7 +219,7 @@
         </div>
 
 
-        <div id="exclusions" role="tabpanel" class="{{ tabClass }}" style="max-height: 100vh;">
+        <div id="exclusions" role="tabpanel" class="{{ tabClass ~ (activeTab == 'exclusions' ? ' show active' : '') }}" style="max-height: 100vh;">
             <div class="sticky-top px-4 py-3 {{ contentHeaderClass }}">
                 <div class="row align-items-center">
                     <div class="col-4 fw-bold content-title">
@@ -214,11 +228,21 @@
                     <div class="col-4 text-center d-flex justify-content-center">
                         {{ block('tabs') }}
                     </div>
+                    <div class="col-auto ms-auto">
+                        {% if is_granted('publish_calendar_event') %}
+                            {% if event.getVersion() != event.publishedVersion %}
+                                <a href="{{ path('calendar_event_publish', { eventUuid: event.uuid }) }}" class="btn btn-success btn-sm">
+                                    {{ 'calendar.label.publishEvent'|trans({}, 'cms') }}
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                    </div>
                 </div>
             </div>
+            {% if activeTab == 'exclusions' %}
+                {{ block('messages') }}
+            {% endif %}
             <div>
-
-
                 {% set orphanedDeviations = event.getOrphanedDeviations() %}
                 {% if orphanedDeviations is not empty %}
                     <div class="p-4 alert alert-warning m-0 border-bottom">

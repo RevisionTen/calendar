@@ -314,6 +314,7 @@ class AdminController extends AbstractController
 
                 return $this->redirectToRoute('calendar_event_edit', [
                     'uuid' => $event->uuid,
+                    'tab' => 'rules',
                 ]);
             }
         }
@@ -321,6 +322,7 @@ class AdminController extends AbstractController
         return $this->render($template, [
             'title' => $this->translator->trans('calendar.label.addRule', [], 'cms'),
             'form' => $form->createView(),
+            'event' => $event,
         ]);
     }
 
@@ -394,6 +396,7 @@ class AdminController extends AbstractController
 
                 return $this->redirectToRoute('calendar_event_edit', [
                     'uuid' => $event->uuid,
+                    'tab' => 'rules',
                 ]);
             }
         }
@@ -401,6 +404,7 @@ class AdminController extends AbstractController
         return $this->render($template, [
             'title' => $this->translator->trans('calendar.label.editRule', [], 'cms'),
             'form' => $form->createView(),
+            'event' => $event,
         ]);
     }
 
@@ -443,6 +447,7 @@ class AdminController extends AbstractController
 
         return $this->redirectToRoute('calendar_event_edit', [
             'uuid' => $event->uuid,
+            'tab' => 'rules',
         ]);
     }
 
@@ -497,6 +502,7 @@ class AdminController extends AbstractController
 
                 return $this->redirectToRoute('calendar_event_edit', [
                     'uuid' => $event->uuid,
+                    'tab' => 'exclusions',
                 ]);
             }
         }
@@ -504,6 +510,7 @@ class AdminController extends AbstractController
         return $this->render($template, [
             'title' => $this->translator->trans('calendar.label.addDeviation', [], 'cms'),
             'form' => $form->createView(),
+            'event' => $event,
         ]);
     }
 
@@ -565,6 +572,7 @@ class AdminController extends AbstractController
 
                 return $this->redirectToRoute('calendar_event_edit', [
                     'uuid' => $event->uuid,
+                    'tab' => 'exclusions',
                 ]);
             }
         }
@@ -572,6 +580,7 @@ class AdminController extends AbstractController
         return $this->render($template, [
             'title' => $this->translator->trans('calendar.label.editDeviation', [], 'cms'),
             'form' => $form->createView(),
+            'event' => $event,
         ]);
     }
 
@@ -614,6 +623,7 @@ class AdminController extends AbstractController
 
         return $this->redirectToRoute('calendar_event_edit', [
             'uuid' => $event->uuid,
+            'tab' => 'exclusions',
         ]);
     }
 }

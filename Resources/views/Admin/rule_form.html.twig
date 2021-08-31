@@ -2,6 +2,9 @@
 {% form_theme form '@Calendar/Admin/form_theme.html.twig' %}
 
 {% block content_title %}
+    <a class="btn btn-sm btn-close-tab" href="{{ path('calendar_event_edit', { uuid: event.uuid, tab: 'rules' }) }}">
+        <span class="fas fa-times"></span>
+    </a>
     {{ title }}
 {% endblock %}
 
