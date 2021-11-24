@@ -104,7 +104,7 @@
                     {% if form.save is defined %}
                         {{ form_widget(form.save, typeOptions) }}
                     {% endif %}
-                    {% if is_granted('publish_calendar_event') %}
+                    {% if is_granted('publish_calendar_event') and event is defined %}
                         {% if event.getVersion() != event.publishedVersion %}
                             <a href="{{ path('calendar_event_publish', { eventUuid: event.uuid }) }}" class="btn btn-success btn-sm">
                                 {{ 'calendar.label.publishEvent'|trans({}, 'cms') }}

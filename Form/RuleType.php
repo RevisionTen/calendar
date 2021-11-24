@@ -91,6 +91,7 @@ class RuleType extends AbstractType
             'required' => false,
             'placeholder' => 'calendar.value.frequencyNone',
             'choices' => [
+                'calendar.value.hourly' => 'hourly',
                 'calendar.value.daily' => 'daily',
                 'calendar.value.weekly' => 'weekly',
                 'calendar.value.monthly' => 'monthly',
@@ -104,12 +105,29 @@ class RuleType extends AbstractType
         $formModifier = static function (FormInterface $form = null, $frequency = null) {
             if ($form) {
                 if ($frequency) {
+                    $repeatEndDateType = DateType::class;
+                    $repeatEndDateRequired = false;
+
                     switch ($frequency) {
+                        case 'hourly':
+                            $repeatEndDateType = DateTimeType::class;
+                            $repeatEndDateRequired = true;
+                            $form->add('frequencyHours', NumberType::class, [
+                                'label' => 'calendar.label.frequencyHours',
+                                'translation_domain' => 'cms',
+                            ]);
+                            $form->remove('frequencyDays');
+                            $form->remove('frequencyWeeks');
+                            $form->remove('frequencyWeeksOn');
+                            $form->remove('frequencyMonths');
+                            $form->remove('frequencyMonthsOn');
+                            break;
                         case 'daily':
                             $form->add('frequencyDays', NumberType::class, [
                                 'label' => 'calendar.label.frequencyDays',
                                 'translation_domain' => 'cms',
                             ]);
+                            $form->remove('frequencyHours');
                             $form->remove('frequencyWeeks');
                             $form->remove('frequencyWeeksOn');
                             $form->remove('frequencyMonths');
@@ -135,6 +153,7 @@ class RuleType extends AbstractType
                                     'calendar.value.sunday' => 'sunday',
                                 ],
                             ]);
+                            $form->remove('frequencyHours');
                             $form->remove('frequencyDays');
                             $form->remove('frequencyMonths');
                             $form->remove('frequencyMonthsOn');
@@ -183,22 +202,25 @@ class RuleType extends AbstractType
                                     '31' => '31',
                                 ],
                             ]);
+                            $form->remove('frequencyHours');
                             $form->remove('frequencyDays');
                             $form->remove('frequencyWeeks');
                             $form->remove('frequencyWeeksOn');
                             break;
                     }
 
-                    $form->add('repeatEndDate', DateType::class, [
+                    $form->add('repeatEndDate', $repeatEndDateType, [
                         'label' => 'calendar.label.repeatEndDate',
                         'translation_domain' => 'cms',
                         'input' => 'timestamp',
                         'widget' => 'single_text',
-                        'required' => false,
-                        'help' => 'calendar.help.repeatEndDate',
+                        'required' => $repeatEndDateRequired,
+                        'help' => $repeatEndDateRequired ? null : 'calendar.help.repeatEndDate',
+                        'constraints' => $repeatEndDateRequired ? new NotBlank() : null,
                     ]);
                 } else {
                     $form->remove('repeatEndDate');
+                    $form->remove('frequencyHours');
                     $form->remove('frequencyDays');
                     $form->remove('frequencyWeeks');
                     $form->remove('frequencyWeeksOn');

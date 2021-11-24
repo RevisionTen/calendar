@@ -49,6 +49,7 @@ final class EventRuleCreateHandler implements HandlerInterface
         }
 
         $rule->frequency = $payload['frequency'] ?? null;
+        $rule->frequencyHours = !empty($payload['frequencyHours']) ? (int) $payload['frequencyHours'] : null;
         $rule->frequencyDays = !empty($payload['frequencyDays']) ? (int) $payload['frequencyDays'] : null;
         $rule->frequencyMonths = !empty($payload['frequencyMonths']) ? (int) $payload['frequencyMonths'] : null;
         $rule->frequencyMonthsOn = $payload['frequencyMonthsOn'] ?? null;

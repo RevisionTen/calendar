@@ -40,6 +40,8 @@ class Rule
 
     public ?DateTimeInterface $repeatEndDate = null;
 
+    public ?int $frequencyHours = null;
+
     public ?int $frequencyDays = null;
 
     public ?int $frequencyWeeks = null;
@@ -79,6 +81,9 @@ class Rule
     public function getDates(Event $event): array
     {
         switch ($this->frequency) {
+            case 'hourly':
+                $dates = $this->getHourlyRepeats($event);
+                break;
             case 'daily':
                 $dates = $this->getDailyRepeats($event);
                 break;
@@ -133,23 +138,52 @@ class Rule
     /**
      * @throws Exception
      */
+    public function getHourlyRepeats(Event $event): array
+    {
+        $dates = [];
+        $dates[] = $this->getDate($this->startDate, $this->endDate, $event);
+
+        $interval = new DateInterval('PT' . $this->frequencyHours . 'H');
+        $repeatEndDate = clone $this->repeatEndDate;
+        $repeatEndDate->add(new DateInterval('PT1S')); // Add one second, so last date is included.
+        $range = new DatePeriod($this->startDate, $interval, $repeatEndDate, DatePeriod::EXCLUDE_START_DATE);
+
+        // Diff original startDate and endDate.
+        $duration = $this->startDate->diff($this->endDate, true);
+
+        foreach($range as $startDate) {
+            /**
+             * @var DateTime $endDate
+             */
+            $endDate = clone $startDate;
+            $endDate->add($duration);
+
+            $dates[] = $this->getDate($startDate, $endDate, $event);
+        }
+
+        return $dates;
+    }
+
+    /**
+     * @throws Exception
+     */
     public function getDailyRepeats(Event $event): array
     {
         $dates = [];
         $dates[] = $this->getDate($this->startDate, $this->endDate, $event);
 
         $interval = new DateInterval('P' . $this->frequencyDays . 'D');
-        $range = new DatePeriod($this->startDate, $interval ,$this->getRepeatEndDate(), DatePeriod::EXCLUDE_START_DATE);
+        $range = new DatePeriod($this->startDate, $interval, $this->getRepeatEndDate(), DatePeriod::EXCLUDE_START_DATE);
+
+        // Diff original startDate and endDate.
+        $duration = $this->startDate->diff($this->endDate, true);
 
         foreach($range as $startDate) {
             /**
-             * Diff original startDate and endDate and add diff to new startDate
-             *
              * @var DateTime $endDate
              */
             $endDate = clone $startDate;
-            $diff = $this->startDate->diff($this->endDate, true);
-            $endDate->add($diff);
+            $endDate->add($duration);
 
             $dates[] = $this->getDate($startDate, $endDate, $event);
         }
@@ -166,7 +200,10 @@ class Rule
         $dates[] = $this->getDate($this->startDate, $this->endDate, $event);
 
         $interval = new DateInterval('P' . ($this->frequencyWeeks*7) . 'D');
-        $range = new DatePeriod($this->startDate, $interval ,$this->getRepeatEndDate(), DatePeriod::EXCLUDE_START_DATE);
+        $range = new DatePeriod($this->startDate, $interval, $this->getRepeatEndDate(), DatePeriod::EXCLUDE_START_DATE);
+
+        // Diff original startDate and endDate.
+        $duration = $this->startDate->diff($this->endDate, true);
 
         foreach($range as $start) {
             /**
@@ -191,10 +228,8 @@ class Rule
                 }
             }
 
-            // Diff original startDate and endDate and add diff to new startDate
             $endDate = clone $startDate;
-            $diff = $this->startDate->diff($this->endDate, true);
-            $endDate->add($diff);
+            $endDate->add($duration);
 
             $dates[] = $this->getDate($startDate, $endDate, $event);
         }
@@ -211,7 +246,10 @@ class Rule
         $dates[] = $this->getDate($this->startDate, $this->endDate, $event);
 
         $interval = new DateInterval('P' . $this->frequencyMonths . 'M');
-        $range = new DatePeriod($this->startDate, $interval ,$this->getRepeatEndDate(), DatePeriod::EXCLUDE_START_DATE);
+        $range = new DatePeriod($this->startDate, $interval, $this->getRepeatEndDate(), DatePeriod::EXCLUDE_START_DATE);
+
+        // Diff original startDate and endDate.
+        $duration = $this->startDate->diff($this->endDate, true);
 
         foreach($range as $start) {
             /**
@@ -220,10 +258,8 @@ class Rule
             $startDate = clone $start;
             $startDate->setDate((int) $startDate->format('Y'), (int) $startDate->format('n'), (int) $this->frequencyMonthsOn);
 
-            // Diff original startDate and endDate and add diff to new startDate
             $endDate = clone $startDate;
-            $diff = $this->startDate->diff($this->endDate, true);
-            $endDate->add($diff);
+            $endDate->add($duration);
 
             $dates[] = $this->getDate($startDate, $endDate, $event);
         }

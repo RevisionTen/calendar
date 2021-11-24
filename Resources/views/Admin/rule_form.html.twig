@@ -58,6 +58,9 @@
 
             {{ form_row(form.frequency) }}
 
+            {% if form.frequencyHours is defined %}
+                {{ form_row(form.frequencyHours) }}
+            {% endif %}
             {% if form.frequencyDays is defined %}
                 {{ form_row(form.frequencyDays) }}
             {% endif %}

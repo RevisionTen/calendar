@@ -366,6 +366,7 @@ class AdminController extends AbstractController
             'endDate' => $rule->endDate->getTimestamp(),
             'repeatEndDate' => $rule->repeatEndDate ? $rule->repeatEndDate->getTimestamp() : null,
             'frequency' => $rule->frequency,
+            'frequencyHours' => $rule->frequencyHours,
             'frequencyDays' => $rule->frequencyDays,
             'frequencyMonths' => $rule->frequencyMonths,
             'frequencyMonthsOn' => $rule->frequencyMonthsOn,

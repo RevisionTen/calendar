@@ -46,6 +46,7 @@ calendar:
         dateRange: "Zeitraum"
         repeatEndDate: "Wiederholung endet am"
         frequency: "Häufigkeit"
+        frequencyHours: "Alle X Stunden"
         frequencyDays: "Alle X Tage"
         frequencyWeeks: "Alle X Wochen"
         frequencyMonths: "Alle X Monate"
@@ -62,6 +63,7 @@ calendar:
         cancelled: "Abgesagt"
     value:
         frequencyNone: "nicht wiederholen"
+        hourly: "Stündlich"
         daily: "Täglich"
         weekly: "Wöchentlich"
         monthly: "Monatlich"
