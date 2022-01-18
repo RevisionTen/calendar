@@ -216,7 +216,7 @@ class RuleType extends AbstractType
                         'widget' => 'single_text',
                         'required' => $repeatEndDateRequired,
                         'help' => $repeatEndDateRequired ? null : 'calendar.help.repeatEndDate',
-                        'constraints' => $repeatEndDateRequired ? new NotBlank() : null,
+                        'constraints' => $repeatEndDateRequired ? new NotBlank() : [],
                     ]);
                 } else {
                     $form->remove('repeatEndDate');
