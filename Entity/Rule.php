@@ -30,6 +30,8 @@ class Rule
 
     public ?string $bookingInfo = null;
 
+    public ?array $image = null;
+
     public ?array $extra = null;
 
     public DateTimeInterface $startDate;
@@ -117,7 +119,7 @@ class Rule
         $date->website = $event->website;
         $date->language = $event->language;
         $date->salesStatus = $event->salesStatus;
-        $date->image = $event->image;
+        $date->image = $this->image ?? $event->image;
         $date->genres = $event->genres;
         $date->keywords = $event->keywords;
         $date->partners = $event->partners;

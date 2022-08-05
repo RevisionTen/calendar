@@ -35,6 +35,7 @@ final class EventRuleEditHandler implements HandlerInterface
         $rule->venue = $payload['venue'] ?? null;
         $rule->artist = $payload['artist'] ?? null;
         $rule->organizer = $payload['organizer'] ?? null;
+        $rule->image = $payload['image'] ?? null;
         $rule->extra = $payload['extra'] ?? null;
 
         $repeatEndDate = $payload['repeatEndDate'] ?? null;

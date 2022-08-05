@@ -2,6 +2,7 @@
 
 namespace RevisionTen\Calendar\Form;
 
+use RevisionTen\CMS\Form\Types\UploadType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
@@ -78,6 +79,14 @@ class RuleType extends AbstractType
             'input' => 'timestamp',
             'date_widget' => 'single_text',
             'time_widget' => 'single_text',
+        ]);
+
+        $builder->add('image', UploadType::class, [
+            'label' => 'calendar.label.image',
+            'translation_domain' => 'cms',
+            'required' => false,
+            'show_file_picker' => true,
+            'file_with_meta_data' => true,
         ]);
 
         $builder->add('save', SubmitType::class, [
