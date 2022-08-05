@@ -61,7 +61,7 @@ class Rule
 
     public function getRepeatEndDate(): DateTime
     {
-        $repeatEndDate = clone $this->repeatEndDate;
+        $repeatEndDate = $this->repeatEndDate ? clone $this->repeatEndDate : null;
         if (null === $repeatEndDate) {
             // Repeats one year if no end date is set.
             $repeatEndDate = clone $this->startDate;
