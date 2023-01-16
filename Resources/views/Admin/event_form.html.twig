@@ -83,294 +83,306 @@
     {% set tabClass = 'col flex-grow-1 overflow-auto flex-column tab-pane ' ~ contentClass %}
 
 
-    {{ form_start(form, {
-        attr: {
-            class: 'content-form ' ~ tabClass ~ (activeTab == 'basic' ? ' show active' : ''),
-            style: 'max-height: 100vh',
-            id: 'basic',
-            role: 'tabpanel',
-        }
-    }) }}
-        <div class="sticky-top px-4 py-3 {{ contentHeaderClass }}">
-            <div class="row align-items-center">
-                <div class="col-4 fw-bold content-title">
-                    {{ block('content_title') }}
-                </div>
-                <div class="col-4 text-center d-flex justify-content-center">
-                    {{ block('tabs') }}
-                </div>
-                <div class="col-auto ms-auto content-actions">
-                    {% set typeOptions = { attr: { class: 'btn btn-primary btn-sm' } } %}
-                    {% if form.save is defined %}
-                        {{ form_widget(form.save, typeOptions) }}
-                    {% endif %}
-                    {% if is_granted('publish_calendar_event') and event is defined %}
-                        {% if event.getVersion() != event.publishedVersion %}
-                            <a href="{{ path('calendar_event_publish', { eventUuid: event.uuid }) }}" class="btn btn-success btn-sm">
-                                {{ 'calendar.label.publishEvent'|trans({}, 'cms') }}
-                            </a>
-                        {% endif %}
-                    {% endif %}
+    {% block content_tab %}
+        {{ form_start(form, {
+            attr: {
+                class: 'content-form ' ~ tabClass ~ (activeTab == 'basic' ? ' show active' : ''),
+                style: 'max-height: 100vh',
+                id: 'basic',
+                role: 'tabpanel',
+            }
+        }) }}
+            <div class="sticky-top px-4 py-3 {{ contentHeaderClass }}">
+                <div class="row align-items-center">
+                    <div class="col-4 fw-bold content-title">
+                        {{ block('content_title') }}
+                    </div>
+                    <div class="col-4 text-center d-flex justify-content-center">
+                        {{ block('tabs') }}
+                    </div>
+                    <div class="col-auto ms-auto content-actions">
+                        {% block content_actions %}
+                            {% set typeOptions = { attr: { class: 'btn btn-primary btn-sm' } } %}
+                            {% if form.save is defined %}
+                                {{ form_widget(form.save, typeOptions) }}
+                            {% endif %}
+                            {% if is_granted('publish_calendar_event') and event is defined %}
+                                {% if event.getVersion() != event.publishedVersion %}
+                                    <a href="{{ path('calendar_event_publish', { eventUuid: event.uuid }) }}" class="btn btn-success btn-sm">
+                                        {{ 'calendar.label.publishEvent'|trans({}, 'cms') }}
+                                    </a>
+                                {% endif %}
+                            {% endif %}
+                        {% endblock %}
+                    </div>
                 </div>
             </div>
-        </div>
-        {% if activeTab == 'basic' %}
-            {{ block('messages') }}
-        {% endif %}
-        {{ block('content') }}
-    {{ form_end(form) }}
+            {% if activeTab == 'basic' %}
+                {{ block('messages') }}
+            {% endif %}
+            {{ block('content') }}
+        {{ form_end(form) }}
+    {% endblock %}
 
     {% if edit %}
 
         {% set cssClass = 'p-4 py-2' %}
 
-        <div id="rules" role="tabpanel" class="{{ tabClass ~ (activeTab == 'rules' ? ' show active' : '') }}" style="max-height: 100vh;">
-            <div class="sticky-top px-4 py-3 {{ contentHeaderClass }}">
-                <div class="row align-items-center">
-                    <div class="col-4 fw-bold content-title">
-                        {{ block('content_title') }}
-                    </div>
-                    <div class="col-4 text-center d-flex justify-content-center">
-                        {{ block('tabs') }}
-                    </div>
-                    <div class="col-auto ms-auto">
-                        <a href="{{ path('calendar_rule_create', { eventUuid: event.uuid }) }}" class="btn btn-sm btn-primary">
-                            <span class="fas fa-plus"></span> {{ 'calendar.label.addRule'|trans({}, 'cms') }}
-                        </a>
-                        {% if is_granted('publish_calendar_event') %}
-                            {% if event.getVersion() != event.publishedVersion %}
-                                <a href="{{ path('calendar_event_publish', { eventUuid: event.uuid }) }}" class="btn btn-success btn-sm">
-                                    {{ 'calendar.label.publishEvent'|trans({}, 'cms') }}
+        {% block rules_tab %}
+            <div id="rules" role="tabpanel" class="{{ tabClass ~ (activeTab == 'rules' ? ' show active' : '') }}" style="max-height: 100vh;">
+                <div class="sticky-top px-4 py-3 {{ contentHeaderClass }}">
+                    <div class="row align-items-center">
+                        <div class="col-4 fw-bold content-title">
+                            {{ block('content_title') }}
+                        </div>
+                        <div class="col-4 text-center d-flex justify-content-center">
+                            {{ block('tabs') }}
+                        </div>
+                        <div class="col-auto ms-auto">
+                            {% block rules_actions %}
+                                <a href="{{ path('calendar_rule_create', { eventUuid: event.uuid }) }}" class="btn btn-sm btn-primary">
+                                    <span class="fas fa-plus"></span> {{ 'calendar.label.addRule'|trans({}, 'cms') }}
                                 </a>
-                            {% endif %}
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            {% if activeTab == 'rules' %}
-                {{ block('messages') }}
-            {% endif %}
-            <div>
-                <table class="my-0 table table-hover small">
-                    <thead>
-                    <tr>
-                        <th class="{{ cssClass }} border-bottom">
-                            {{ 'calendar.label.ruleTitle'|trans({}, 'cms') }}
-                        </th>
-                        <th class="{{ cssClass }} border-bottom">
-                            {{ 'calendar.label.startDate'|trans({}, 'cms') }}
-                        </th>
-                        <th class="{{ cssClass }} border-bottom">
-                            {{ 'calendar.label.frequency'|trans({}, 'cms') }}
-                        </th>
-                        <th class="{{ cssClass }} border-bottom">
-                        </th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for rule in event.rules %}
-                        <tr>
-                            <td class="{{ cssClass }}">
-                                {{ rule.ruleTitle }}
-                            </td>
-                            <td class="{{ cssClass }}">
-                                {{ rule.startDate|date('d.m.Y H:i') }}
-                            </td>
-                            <td class="{{ cssClass }}">
-                                {% if rule.frequency == 'daily' %}
-                                    {{ 'calendar.value.repeatsDaily'|trans({
-                                        '%frequencyDays%': rule.frequencyDays,
-                                    }, 'cms') }}
-                                {% elseif rule.frequency == 'weekly' %}
-                                    {{ 'calendar.value.repeatsWeekly'|trans({
-                                        '%frequencyWeeks%': rule.frequencyWeeks,
-                                        '%frequencyWeeksOn%': ('calendar.value.'~rule.frequencyWeeksOn)|trans({}, 'cms'),
-                                    }, 'cms') }}
-                                {% elseif rule.frequency == 'monthly' %}
-                                    {{ 'calendar.value.repeatsMonthly'|trans({
-                                        '%frequencyMonths%': rule.frequencyMonths,
-                                        '%frequencyMonthsOn%': rule.frequencyMonthsOn,
-                                    }, 'cms') }}
-                                {% else %}
-                                    {{ ('calendar.value.'~(rule.frequency ?? 'frequencyNone'))|trans({}, 'cms') }}
+                                {% if is_granted('publish_calendar_event') %}
+                                    {% if event.getVersion() != event.publishedVersion %}
+                                        <a href="{{ path('calendar_event_publish', { eventUuid: event.uuid }) }}" class="btn btn-success btn-sm">
+                                            {{ 'calendar.label.publishEvent'|trans({}, 'cms') }}
+                                        </a>
+                                    {% endif %}
                                 {% endif %}
-                            </td>
-                            <td class="{{ cssClass }} text-end">
-                                {% set btnClass = 'text-decoration-none me-2' %}
-
-                                <a href="{{ path('calendar_rule_edit', { eventUuid: event.uuid, ruleUuid: rule.uuid }) }}"
-                                   class="{{ btnClass }}"
-                                   aria-label="{{ 'admin.btn.edit'|trans({}, 'cms') }}"
-                                >
-                                    <span class="fa fa-edit"></span>
-                                </a>
-                                <a href="{{ path('calendar_rule_delete', { eventUuid: event.uuid, ruleUuid: rule.uuid }) }}"
-                                   class="{{ btnClass }} text-danger"
-                                   aria-label="{{ 'admin.btn.delete'|trans({}, 'cms') }}"
-                                >
-                                    <span class="fa fa-trash"></span>
-                                </a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-
-        <div id="exclusions" role="tabpanel" class="{{ tabClass ~ (activeTab == 'exclusions' ? ' show active' : '') }}" style="max-height: 100vh;">
-            <div class="sticky-top px-4 py-3 {{ contentHeaderClass }}">
-                <div class="row align-items-center">
-                    <div class="col-4 fw-bold content-title">
-                        {{ block('content_title') }}
-                    </div>
-                    <div class="col-4 text-center d-flex justify-content-center">
-                        {{ block('tabs') }}
-                    </div>
-                    <div class="col-auto ms-auto">
-                        {% if is_granted('publish_calendar_event') %}
-                            {% if event.getVersion() != event.publishedVersion %}
-                                <a href="{{ path('calendar_event_publish', { eventUuid: event.uuid }) }}" class="btn btn-success btn-sm">
-                                    {{ 'calendar.label.publishEvent'|trans({}, 'cms') }}
-                                </a>
-                            {% endif %}
-                        {% endif %}
+                            {% endblock %}
+                        </div>
                     </div>
                 </div>
-            </div>
-            {% if activeTab == 'exclusions' %}
-                {{ block('messages') }}
-            {% endif %}
-            <div>
-                {% set orphanedDeviations = event.getOrphanedDeviations() %}
-                {% if orphanedDeviations is not empty %}
-                    <div class="p-4 alert alert-warning m-0 border-bottom">
-                        <h5 class="mb-3">
-                            Verwaiste Ausnahmen
-                        </h5>
-                        <table class="border border-warning my-0 table-warning table table-hover small">
-                            <thead>
+                {% if activeTab == 'rules' %}
+                    {{ block('messages') }}
+                {% endif %}
+                <div>
+                    <table class="my-0 table table-hover small">
+                        <thead>
+                        <tr>
+                            <th class="{{ cssClass }} border-bottom">
+                                {{ 'calendar.label.ruleTitle'|trans({}, 'cms') }}
+                            </th>
+                            <th class="{{ cssClass }} border-bottom">
+                                {{ 'calendar.label.startDate'|trans({}, 'cms') }}
+                            </th>
+                            <th class="{{ cssClass }} border-bottom">
+                                {{ 'calendar.label.frequency'|trans({}, 'cms') }}
+                            </th>
+                            <th class="{{ cssClass }} border-bottom">
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for rule in event.rules %}
                             <tr>
-                                <th class="{{ cssClass }} border-bottom border-warning">
-                                    {{ 'calendar.label.dateRange'|trans({}, 'cms') }}
-                                </th>
-                                <th class="{{ cssClass }} border-bottom border-warning">
-                                    {{ 'calendar.label.deviation'|trans({}, 'cms') }}
-                                </th>
-                                <th class="{{ cssClass }} border-bottom border-warning">
-                                </th>
+                                <td class="{{ cssClass }}">
+                                    {{ rule.ruleTitle }}
+                                </td>
+                                <td class="{{ cssClass }}">
+                                    {{ rule.startDate|date('d.m.Y H:i') }}
+                                </td>
+                                <td class="{{ cssClass }}">
+                                    {% if rule.frequency == 'daily' %}
+                                        {{ 'calendar.value.repeatsDaily'|trans({
+                                            '%frequencyDays%': rule.frequencyDays,
+                                        }, 'cms') }}
+                                    {% elseif rule.frequency == 'weekly' %}
+                                        {{ 'calendar.value.repeatsWeekly'|trans({
+                                            '%frequencyWeeks%': rule.frequencyWeeks,
+                                            '%frequencyWeeksOn%': ('calendar.value.'~rule.frequencyWeeksOn)|trans({}, 'cms'),
+                                        }, 'cms') }}
+                                    {% elseif rule.frequency == 'monthly' %}
+                                        {{ 'calendar.value.repeatsMonthly'|trans({
+                                            '%frequencyMonths%': rule.frequencyMonths,
+                                            '%frequencyMonthsOn%': rule.frequencyMonthsOn,
+                                        }, 'cms') }}
+                                    {% else %}
+                                        {{ ('calendar.value.'~(rule.frequency ?? 'frequencyNone'))|trans({}, 'cms') }}
+                                    {% endif %}
+                                </td>
+                                <td class="{{ cssClass }} text-end">
+                                    {% set btnClass = 'text-decoration-none me-2' %}
+
+                                    <a href="{{ path('calendar_rule_edit', { eventUuid: event.uuid, ruleUuid: rule.uuid }) }}"
+                                       class="{{ btnClass }}"
+                                       aria-label="{{ 'admin.btn.edit'|trans({}, 'cms') }}"
+                                    >
+                                        <span class="fa fa-edit"></span>
+                                    </a>
+                                    <a href="{{ path('calendar_rule_delete', { eventUuid: event.uuid, ruleUuid: rule.uuid }) }}"
+                                       class="{{ btnClass }} text-danger"
+                                       aria-label="{{ 'admin.btn.delete'|trans({}, 'cms') }}"
+                                    >
+                                        <span class="fa fa-trash"></span>
+                                    </a>
+                                </td>
                             </tr>
-                            </thead>
-                            <tbody>
-                            {% for deviation in orphanedDeviations %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endblock %}
+
+
+        {% block exclusions_tab %}
+            <div id="exclusions" role="tabpanel" class="{{ tabClass ~ (activeTab == 'exclusions' ? ' show active' : '') }}" style="max-height: 100vh;">
+                <div class="sticky-top px-4 py-3 {{ contentHeaderClass }}">
+                    <div class="row align-items-center">
+                        <div class="col-4 fw-bold content-title">
+                            {{ block('content_title') }}
+                        </div>
+                        <div class="col-4 text-center d-flex justify-content-center">
+                            {{ block('tabs') }}
+                        </div>
+                        <div class="col-auto ms-auto">
+                            {% block exclusions_actions %}
+                                {% if is_granted('publish_calendar_event') %}
+                                    {% if event.getVersion() != event.publishedVersion %}
+                                        <a href="{{ path('calendar_event_publish', { eventUuid: event.uuid }) }}" class="btn btn-success btn-sm">
+                                            {{ 'calendar.label.publishEvent'|trans({}, 'cms') }}
+                                        </a>
+                                    {% endif %}
+                                {% endif %}
+                            {% endblock %}
+                        </div>
+                    </div>
+                </div>
+                {% if activeTab == 'exclusions' %}
+                    {{ block('messages') }}
+                {% endif %}
+                <div>
+                    {% set orphanedDeviations = event.getOrphanedDeviations() %}
+                    {% if orphanedDeviations is not empty %}
+                        <div class="p-4 alert alert-warning m-0 border-bottom">
+                            <h5 class="mb-3">
+                                Verwaiste Ausnahmen
+                            </h5>
+                            <table class="border border-warning my-0 table-warning table table-hover small">
+                                <thead>
                                 <tr>
-                                    <td class="{{ cssClass }} border-warning">
-                                        {{ ('calendar.value.'~deviation.deviationStartDate|date('l')|lower)|trans({}, 'cms') }}
-                                        {{ deviation.deviationStartDate|date('d.m.Y - H:i') }} Uhr bis
-                                        {% if deviation.deviationStartDate|date('d.m.Y') != deviation.deviationEndDate|date('d.m.Y') %}
-                                            {{ ('calendar.value.'~deviation.deviationEndDate|date('l')|lower)|trans({}, 'cms') }}
-                                            {{ deviation.deviationEndDate|date('d.m.Y - H:i') }} Uhr
-                                        {% else %}
-                                            {{ deviation.deviationEndDate|date('H:i') }} Uhr
-                                        {% endif %}
-                                    </td>
-                                    <td class="{{ cssClass }} border-warning">
+                                    <th class="{{ cssClass }} border-bottom border-warning">
+                                        {{ 'calendar.label.dateRange'|trans({}, 'cms') }}
+                                    </th>
+                                    <th class="{{ cssClass }} border-bottom border-warning">
+                                        {{ 'calendar.label.deviation'|trans({}, 'cms') }}
+                                    </th>
+                                    <th class="{{ cssClass }} border-bottom border-warning">
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for deviation in orphanedDeviations %}
+                                    <tr>
+                                        <td class="{{ cssClass }} border-warning">
+                                            {{ ('calendar.value.'~deviation.deviationStartDate|date('l')|lower)|trans({}, 'cms') }}
+                                            {{ deviation.deviationStartDate|date('d.m.Y - H:i') }} Uhr bis
+                                            {% if deviation.deviationStartDate|date('d.m.Y') != deviation.deviationEndDate|date('d.m.Y') %}
+                                                {{ ('calendar.value.'~deviation.deviationEndDate|date('l')|lower)|trans({}, 'cms') }}
+                                                {{ deviation.deviationEndDate|date('d.m.Y - H:i') }} Uhr
+                                            {% else %}
+                                                {{ deviation.deviationEndDate|date('H:i') }} Uhr
+                                            {% endif %}
+                                        </td>
+                                        <td class="{{ cssClass }} border-warning">
+                                            {% include '@Calendar/Admin/_deviation.html.twig' %}
+                                        </td>
+                                        <td class="{{ cssClass }} border-warning text-end">
+                                            {% set btnClass = 'text-decoration-none me-2' %}
+                                            <a href="{{ path('calendar_deviation_edit', { eventUuid: event.uuid, deviationUuid: deviation.uuid }) }}"
+                                               class="{{ btnClass }}"
+                                               aria-label="{{ 'calendar.label.editDeviation'|trans({}, 'cms') }}"
+                                            >
+                                                <span class="fas fa-edit"></span>
+                                            </a>
+                                            <a href="{{ path('calendar_deviation_delete', { eventUuid: event.uuid, deviationUuid: deviation.uuid }) }}"
+                                               class="{{ btnClass }} text-danger"
+                                               aria-label="{{ 'calendar.label.deleteDeviation'|trans({}, 'cms') }}"
+                                            >
+                                                <span class="fa fa-trash"></span>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+
+                    <table class="my-0 table table-hover small">
+                        <thead>
+                        <tr>
+                            <th class="{{ cssClass }} border-bottom">
+                                {{ 'calendar.label.dateRange'|trans({}, 'cms') }}
+                            </th>
+                            <th class="{{ cssClass }} border-bottom">
+                                {{ 'calendar.label.ruleTitle'|trans({}, 'cms') }}
+                            </th>
+                            <th class="{{ cssClass }} border-bottom">
+                                {{ 'calendar.label.deviation'|trans({}, 'cms') }}
+                            </th>
+                            <th class="{{ cssClass }} border-bottom">
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% set dates = event.getDates() %}
+                        {% for date in dates %}
+                            <tr>
+                                <td class="{{ cssClass }}">
+                                    {{ ('calendar.value.'~date.startDate|date('l')|lower)|trans({}, 'cms') }}
+                                    {{ date.startDate|date('d.m.Y - H:i') }} Uhr bis
+                                    {% if date.startDate|date('d.m.Y') != date.endDate|date('d.m.Y') %}
+                                        {{ ('calendar.value.'~date.endDate|date('l')|lower)|trans({}, 'cms') }}
+                                        {{ date.endDate|date('d.m.Y - H:i') }} Uhr
+                                    {% else %}
+                                        {{ date.endDate|date('H:i') }} Uhr
+                                    {% endif %}
+                                </td>
+                                <td class="{{ cssClass }}">
+                                    {{ date.ruleTitle }}
+                                </td>
+                                <td class="{{ cssClass }}">
+                                    {% if date.deviation %}
+                                        {% set deviation = date.deviation %}
                                         {% include '@Calendar/Admin/_deviation.html.twig' %}
-                                    </td>
-                                    <td class="{{ cssClass }} border-warning text-end">
-                                        {% set btnClass = 'text-decoration-none me-2' %}
-                                        <a href="{{ path('calendar_deviation_edit', { eventUuid: event.uuid, deviationUuid: deviation.uuid }) }}"
+                                    {% endif %}
+                                </td>
+                                <td class="{{ cssClass }} text-end">
+                                    {% set btnClass = 'text-decoration-none me-2' %}
+
+                                    {% if date.deviation %}
+                                        <a href="{{ path('calendar_deviation_edit', { eventUuid: event.uuid, deviationUuid: date.deviation.uuid }) }}"
                                            class="{{ btnClass }}"
                                            aria-label="{{ 'calendar.label.editDeviation'|trans({}, 'cms') }}"
                                         >
                                             <span class="fas fa-edit"></span>
                                         </a>
-                                        <a href="{{ path('calendar_deviation_delete', { eventUuid: event.uuid, deviationUuid: deviation.uuid }) }}"
+                                        <a href="{{ path('calendar_deviation_delete', { eventUuid: event.uuid, deviationUuid: date.deviation.uuid }) }}"
                                            class="{{ btnClass }} text-danger"
                                            aria-label="{{ 'calendar.label.deleteDeviation'|trans({}, 'cms') }}"
                                         >
                                             <span class="fa fa-trash"></span>
                                         </a>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% endif %}
+                                    {% else %}
+                                        <a href="{{ path('calendar_deviation_create', { eventUuid: event.uuid, start: date.startDate|date('U'), end: date.endDate|date('U') }) }}"
+                                           class="{{ btnClass }}"
+                                           aria-label="{{ 'calendar.label.addDeviation'|trans({}, 'cms') }}"
+                                        >
+                                            <span class="fas fa-plus"></span> {{ 'calendar.label.addDeviation'|trans({}, 'cms') }}
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
 
-                <table class="my-0 table table-hover small">
-                    <thead>
-                    <tr>
-                        <th class="{{ cssClass }} border-bottom">
-                            {{ 'calendar.label.dateRange'|trans({}, 'cms') }}
-                        </th>
-                        <th class="{{ cssClass }} border-bottom">
-                            {{ 'calendar.label.ruleTitle'|trans({}, 'cms') }}
-                        </th>
-                        <th class="{{ cssClass }} border-bottom">
-                            {{ 'calendar.label.deviation'|trans({}, 'cms') }}
-                        </th>
-                        <th class="{{ cssClass }} border-bottom">
-                        </th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% set dates = event.getDates() %}
-                    {% for date in dates %}
-                        <tr>
-                            <td class="{{ cssClass }}">
-                                {{ ('calendar.value.'~date.startDate|date('l')|lower)|trans({}, 'cms') }}
-                                {{ date.startDate|date('d.m.Y - H:i') }} Uhr bis
-                                {% if date.startDate|date('d.m.Y') != date.endDate|date('d.m.Y') %}
-                                    {{ ('calendar.value.'~date.endDate|date('l')|lower)|trans({}, 'cms') }}
-                                    {{ date.endDate|date('d.m.Y - H:i') }} Uhr
-                                {% else %}
-                                    {{ date.endDate|date('H:i') }} Uhr
-                                {% endif %}
-                            </td>
-                            <td class="{{ cssClass }}">
-                                {{ date.ruleTitle }}
-                            </td>
-                            <td class="{{ cssClass }}">
-                                {% if date.deviation %}
-                                    {% set deviation = date.deviation %}
-                                    {% include '@Calendar/Admin/_deviation.html.twig' %}
-                                {% endif %}
-                            </td>
-                            <td class="{{ cssClass }} text-end">
-                                {% set btnClass = 'text-decoration-none me-2' %}
-
-                                {% if date.deviation %}
-                                    <a href="{{ path('calendar_deviation_edit', { eventUuid: event.uuid, deviationUuid: date.deviation.uuid }) }}"
-                                       class="{{ btnClass }}"
-                                       aria-label="{{ 'calendar.label.editDeviation'|trans({}, 'cms') }}"
-                                    >
-                                        <span class="fas fa-edit"></span>
-                                    </a>
-                                    <a href="{{ path('calendar_deviation_delete', { eventUuid: event.uuid, deviationUuid: date.deviation.uuid }) }}"
-                                       class="{{ btnClass }} text-danger"
-                                       aria-label="{{ 'calendar.label.deleteDeviation'|trans({}, 'cms') }}"
-                                    >
-                                        <span class="fa fa-trash"></span>
-                                    </a>
-                                {% else %}
-                                    <a href="{{ path('calendar_deviation_create', { eventUuid: event.uuid, start: date.startDate|date('U'), end: date.endDate|date('U') }) }}"
-                                       class="{{ btnClass }}"
-                                       aria-label="{{ 'calendar.label.addDeviation'|trans({}, 'cms') }}"
-                                    >
-                                        <span class="fas fa-plus"></span> {{ 'calendar.label.addDeviation'|trans({}, 'cms') }}
-                                    </a>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-
+                </div>
             </div>
-        </div>
+        {% endblock %}
     {% endif %}
 
 {% endblock content_wrapper %}
