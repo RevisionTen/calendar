@@ -57,6 +57,8 @@ final class EventRuleCreateHandler implements HandlerInterface
         $rule->frequencyWeeks = !empty($payload['frequencyWeeks']) ? (int) $payload['frequencyWeeks'] : null;
         $rule->frequencyWeeksOn = $payload['frequencyWeeksOn'] ?? null;
 
+        $rule->salesStatus = $payload['salesStatus'] ?? null;
+
         $startDate = $payload['startDate'];
         $endDate = $payload['endDate'];
         $rule->startDate->setTimestamp($startDate);

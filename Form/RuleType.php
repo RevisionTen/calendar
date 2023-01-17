@@ -2,6 +2,7 @@
 
 namespace RevisionTen\Calendar\Form;
 
+use RevisionTen\Calendar\Entity\Event;
 use RevisionTen\CMS\Form\Types\UploadType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -79,6 +80,20 @@ class RuleType extends AbstractType
             'input' => 'timestamp',
             'date_widget' => 'single_text',
             'time_widget' => 'single_text',
+        ]);
+
+        $builder->add('salesStatus', ChoiceType::class, [
+            'label' => 'calendar.label.salesStatus',
+            'translation_domain' => 'cms',
+            'required' => false,
+            'expanded' => true,
+            'choices' => [
+                'calendar.salesStates.'.Event::STATE_SALE => Event::STATE_SALE,
+                'calendar.salesStates.'.Event::STATE_PRE_SALE => Event::STATE_PRE_SALE,
+                'calendar.salesStates.'.Event::STATE_SOLD => Event::STATE_SOLD,
+                'calendar.salesStates.'.Event::STATE_POSTPONED => Event::STATE_POSTPONED,
+                'calendar.salesStates.'.Event::STATE_CANCELLED => Event::STATE_CANCELLED,
+            ],
         ]);
 
         $builder->add('image', UploadType::class, [

@@ -54,6 +54,8 @@ class Rule
 
     public ?string $frequencyMonthsOn = null;
 
+    public ?string $salesStatus = null;
+
     public function __construct(string $uuid)
     {
         $this->uuid = $uuid;
@@ -118,7 +120,7 @@ class Rule
 
         $date->website = $event->website;
         $date->language = $event->language;
-        $date->salesStatus = $event->salesStatus;
+        $date->salesStatus = $this->salesStatus ?? $event->salesStatus;
         $date->image = $this->image ?? $event->image;
         $date->genres = $event->genres;
         $date->keywords = $event->keywords;

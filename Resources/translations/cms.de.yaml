@@ -56,7 +56,7 @@ calendar:
     help:
         repeatEndDate: "Die Veranstaltung wird bis einschließlich zu diesem Datum wiederholt. Wenn dieses Feld leer gelassen wird, wird die Veranstaltung für einen Zeitraum von 365 Tagen wiederholt."
     salesStates:
-        preSale: "Vorverkauf"
+        preSale: "noch nicht in den Verkauf gestartet"
         sale: "Verkauf"
         sold: "Ausverkauft"
         postponed: "Verschoben"

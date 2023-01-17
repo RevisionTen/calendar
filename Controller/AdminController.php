@@ -360,6 +360,7 @@ class AdminController extends AbstractController
             'extra' => $rule->extra,
             'artist' => $rule->artist,
             'organizer' => $rule->organizer,
+            'salesStatus' => $rule->salesStatus,
             'image' => $rule->image,
             'title' => $rule->title,
             'participants' => $rule->participants,
