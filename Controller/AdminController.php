@@ -15,6 +15,7 @@ use RevisionTen\Calendar\Command\EventRuleCreateCommand;
 use RevisionTen\Calendar\Command\EventDeleteCommand;
 use RevisionTen\Calendar\Command\EventEditCommand;
 use RevisionTen\Calendar\Command\EventRuleDeleteCommand;
+use RevisionTen\Calendar\Command\EventRuleDuplicateCommand;
 use RevisionTen\Calendar\Command\EventRuleEditCommand;
 use RevisionTen\Calendar\Entity\Event;
 use RevisionTen\Calendar\Entity\EventStreamRead;
@@ -413,6 +414,48 @@ class AdminController extends AbstractController
     }
 
     /**
+     * @Route("/calendar/rule/{eventUuid}/duplicate/{ruleUuid}", name="calendar_rule_duplicate")
+     *
+     * @param string $eventUuid
+     * @param string $ruleUuid
+     *
+     * @return RedirectResponse
+     * @throws InterfaceException
+     */
+    public function duplicateRule(string $eventUuid, string $ruleUuid): RedirectResponse
+    {
+        $this->denyAccessUnlessGranted('edit_calendar_event');
+
+        /**
+         * @var Event $event
+         */
+        $event = $this->aggregateFactory->build($eventUuid, Event::class);
+        $rule = $event->getRule($ruleUuid);
+
+        /**
+         * @var UserRead $user
+         */
+        $user = $this->getUser();
+
+        $payload = [
+            'uuid' => $rule->uuid,
+        ];
+
+        $success = $this->commandBus->execute(EventRuleDuplicateCommand::class, $event->uuid, $payload, $user->getId(), false);
+        if ($success) {
+            $this->addFlash(
+                'success',
+                $this->translator->trans('Rule duplicated', [], 'cms')
+            );
+        }
+
+        return $this->redirectToRoute('calendar_event_edit', [
+            'uuid' => $event->uuid,
+            'tab' => 'rules',
+        ]);
+    }
+
+    /**
      * @Route("/calendar/rule/{eventUuid}/delete/{ruleUuid}", name="calendar_rule_delete")
      *
      * @param string $eventUuid
@@ -440,8 +483,7 @@ class AdminController extends AbstractController
             'uuid' => $rule->uuid,
         ];
 
-        $queueEvents = false;
-        $success = $this->commandBus->execute(EventRuleDeleteCommand::class, $event->uuid, $payload, $user->getId(), $queueEvents);
+        $success = $this->commandBus->execute(EventRuleDeleteCommand::class, $event->uuid, $payload, $user->getId(), false);
         if ($success) {
             $this->addFlash(
                 'success',
@@ -496,8 +538,7 @@ class AdminController extends AbstractController
         if (!$ignore_validation && $form->isSubmitted() && $form->isValid()) {
             $payload = $form->getData();
 
-            $queueEvents = false;
-            $success = $this->commandBus->execute(EventDeviationCreateCommand::class, $event->uuid, $payload, $user->getId(), $queueEvents);
+            $success = $this->commandBus->execute(EventDeviationCreateCommand::class, $event->uuid, $payload, $user->getId(), false);
             if ($success) {
                 $this->addFlash(
                     'success',
@@ -566,8 +607,7 @@ class AdminController extends AbstractController
         if (!$ignore_validation && $form->isSubmitted() && $form->isValid()) {
             $payload = $form->getData();
 
-            $queueEvents = false;
-            $success = $this->commandBus->execute(EventDeviationEditCommand::class, $event->uuid, $payload, $user->getId(), $queueEvents);
+            $success = $this->commandBus->execute(EventDeviationEditCommand::class, $event->uuid, $payload, $user->getId(), false);
             if ($success) {
                 $this->addFlash(
                     'success',
@@ -616,8 +656,7 @@ class AdminController extends AbstractController
             'uuid' => $deviation->uuid,
         ];
 
-        $queueEvents = false;
-        $success = $this->commandBus->execute(EventDeviationDeleteCommand::class, $event->uuid, $payload, $user->getId(), $queueEvents);
+        $success = $this->commandBus->execute(EventDeviationDeleteCommand::class, $event->uuid, $payload, $user->getId(), false);
         if ($success) {
             $this->addFlash(
                 'success',

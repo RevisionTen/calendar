@@ -209,13 +209,19 @@
                                        class="{{ btnClass }}"
                                        aria-label="{{ 'admin.btn.edit'|trans({}, 'cms') }}"
                                     >
-                                        <span class="fa fa-edit"></span>
+                                        <span class="fas fa-edit"></span>
+                                    </a>
+                                    <a href="{{ path('calendar_rule_duplicate', { eventUuid: event.uuid, ruleUuid: rule.uuid }) }}"
+                                       class="{{ btnClass }}"
+                                       aria-label="{{ 'admin.btn.duplicate'|trans({}, 'cms') }}"
+                                    >
+                                        <span class="fas fa-clone"></span>
                                     </a>
                                     <a href="{{ path('calendar_rule_delete', { eventUuid: event.uuid, ruleUuid: rule.uuid }) }}"
                                        class="{{ btnClass }} text-danger"
                                        aria-label="{{ 'admin.btn.delete'|trans({}, 'cms') }}"
                                     >
-                                        <span class="fa fa-trash"></span>
+                                        <span class="fas fa-trash"></span>
                                     </a>
                                 </td>
                             </tr>

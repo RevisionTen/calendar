@@ -13,6 +13,7 @@ use RevisionTen\Calendar\Event\EventEditEvent;
 use RevisionTen\Calendar\Event\EventPublishEvent;
 use RevisionTen\Calendar\Event\EventRuleCreateEvent;
 use RevisionTen\Calendar\Event\EventRuleDeleteEvent;
+use RevisionTen\Calendar\Event\EventRuleDuplicateEvent;
 use RevisionTen\Calendar\Event\EventRuleEditEvent;
 use RevisionTen\Calendar\Services\CalendarService;
 use RevisionTen\CQRS\Interfaces\EventInterface;
@@ -37,6 +38,7 @@ class EventSubscriber implements EventSubscriberInterface
             EventRuleCreateEvent::class => 'updateReadModel',
             EventRuleEditEvent::class => 'updateReadModel',
             EventRuleDeleteEvent::class => 'updateReadModel',
+            EventRuleDuplicateEvent::class => 'updateReadModel',
             EventDeviationCreateEvent::class => 'updateReadModel',
             EventDeviationEditEvent::class => 'updateReadModel',
             EventDeviationDeleteEvent::class => 'updateReadModel',

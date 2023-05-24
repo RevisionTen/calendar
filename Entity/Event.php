@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace RevisionTen\Calendar\Entity;
 
-use DateTimeInterface;
 use Exception;
 use RevisionTen\CQRS\Model\Aggregate;
 
@@ -66,6 +65,19 @@ class Event extends Aggregate
     public function addRule(Rule $rule): void
     {
         $this->rules[$rule->uuid] = $rule;
+    }
+
+    public function addRuleAfter(Rule $newRule, Rule $ruleBefore): void
+    {
+        // Insert the $newRule after the $ruleBefore in the $this->rules property.
+        $newRules = [];
+        foreach ($this->rules as $rule) {
+            $newRules[$rule->uuid] = $rule;
+            if ($rule->uuid === $ruleBefore->uuid) {
+                $newRules[$newRule->uuid] = $newRule;
+            }
+        }
+        $this->rules = $newRules;
     }
 
     public function updateRule(Rule $rule): void
