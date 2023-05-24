@@ -32,6 +32,7 @@ final class EventDeviationEditHandler implements HandlerInterface
         $deviation->salesStatus = $payload['salesStatus'] ?? null;
         $deviation->venue = $payload['venue'] ?? null;
         $deviation->extra = $payload['extra'] ?? null;
+        $deviation->keywords = $payload['keywords'] ?? null;
 
         if (!empty($payload['startDate'])) {
             $startDate = new DateTime();

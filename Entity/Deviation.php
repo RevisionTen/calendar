@@ -27,6 +27,8 @@ class Deviation
 
     public ?array $extra = null;
 
+    public ?array $keywords = null;
+
     public function __construct(string $deviationUuid, DateTimeInterface $deviationStartDate, DateTimeInterface $deviationEndDate)
     {
         $this->uuid = $deviationUuid;

@@ -77,6 +77,9 @@ class Date
             if ($deviation->salesStatus) {
                 $date->salesStatus = $deviation->salesStatus;
             }
+            if ($deviation->keywords) {
+                $date->keywords = $deviation->keywords;
+            }
         }
 
         return $date;

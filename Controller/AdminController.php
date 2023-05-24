@@ -358,6 +358,7 @@ class AdminController extends AbstractController
             'bookingInfo' => $rule->bookingInfo,
             'venue' => $rule->venue,
             'extra' => $rule->extra,
+            'keywords' => $rule->keywords,
             'artist' => $rule->artist,
             'organizer' => $rule->organizer,
             'salesStatus' => $rule->salesStatus,

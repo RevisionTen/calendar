@@ -37,6 +37,7 @@ final class EventRuleEditHandler implements HandlerInterface
         $rule->organizer = $payload['organizer'] ?? null;
         $rule->image = $payload['image'] ?? null;
         $rule->extra = $payload['extra'] ?? null;
+        $rule->keywords = $payload['keywords'] ?? null;
 
         $repeatEndDate = $payload['repeatEndDate'] ?? null;
         if (!empty($repeatEndDate)) {
