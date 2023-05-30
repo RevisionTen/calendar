@@ -36,6 +36,8 @@ class Rule
 
     public ?array $keywords = null;
 
+    public ?array $genres = null;
+
     public DateTimeInterface $startDate;
 
     public DateTimeInterface $endDate;
@@ -124,7 +126,7 @@ class Rule
         $date->language = $event->language;
         $date->salesStatus = $this->salesStatus ?? $event->salesStatus;
         $date->image = $this->image ?? $event->image;
-        $date->genres = $event->genres;
+        $date->genres = $this->genres ?? $event->genres;
         $date->keywords = $this->keywords ?? $event->keywords;
         $date->partners = $event->partners;
 

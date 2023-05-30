@@ -80,6 +80,9 @@ class Date
             if ($deviation->keywords) {
                 $date->keywords = $deviation->keywords;
             }
+            if ($deviation->genres) {
+                $date->genres = $deviation->genres;
+            }
         }
 
         return $date;

@@ -40,6 +40,7 @@ final class EventRuleCreateHandler implements HandlerInterface
         $rule->image = $payload['image'] ?? null;
         $rule->extra = $payload['extra'] ?? null;
         $rule->keywords = $payload['keywords'] ?? null;
+        $rule->genres = $payload['genres'] ?? null;
 
         $repeatEndDate = $payload['repeatEndDate'] ?? null;
         if (!empty($repeatEndDate)) {

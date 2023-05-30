@@ -14,7 +14,6 @@ class Deviation
 
     public DateTimeInterface $deviationEndDate;
 
-
     public ?DateTimeInterface $startDate = null;
 
     public ?DateTimeInterface $endDate = null;
@@ -28,6 +27,8 @@ class Deviation
     public ?array $extra = null;
 
     public ?array $keywords = null;
+
+    public ?array $genres = null;
 
     public function __construct(string $deviationUuid, DateTimeInterface $deviationStartDate, DateTimeInterface $deviationEndDate)
     {
