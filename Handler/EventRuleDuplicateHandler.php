@@ -29,6 +29,10 @@ final class EventRuleDuplicateHandler implements HandlerInterface
         $originalRule = $aggregate->getRule($ruleUuid);
 
         $rule = clone $originalRule;
+        $rule->startDate = clone $originalRule->startDate;
+        $rule->endDate = clone $originalRule->endDate;
+        $rule->repeatEndDate = $originalRule->repeatEndDate !== null ? clone $originalRule->repeatEndDate : null;
+
         // Convert old uuid to hash (in 16char bytes) and use it as a seed.
         $commandUuid = $event->getCommandUuid();
         $seed = $commandUuid.'-'.$ruleUuid;
