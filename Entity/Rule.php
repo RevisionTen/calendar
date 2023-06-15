@@ -126,15 +126,15 @@ class Rule
         $date->language = $event->language;
         $date->salesStatus = $this->salesStatus ?? $event->salesStatus;
         $date->image = $this->image ?? $event->image;
-        $date->genres = $this->genres ?? $event->genres;
-        $date->keywords = $this->keywords ?? $event->keywords;
+        $date->genres = !empty($this->genres) ? $this->genres : $event->genres;
+        $date->keywords = !empty($this->keywords) ? $this->keywords : $event->keywords;
         $date->partners = $event->partners;
 
         $date->eventExtra = $event->extra;
         $date->ruleExtra = $this->extra;
 
-        $date->artist = $this->artist ?? $event->artist;
-        $date->venue = $this->venue ?? $event->venue;
+        $date->artist = !empty($this->artist) ? $this->artist : $event->artist;
+        $date->venue = !empty($this->venue) ? $this->venue : $event->venue;
         $date->description = $this->description ?? $event->description;
         $date->bookingInfo = $this->bookingInfo ?? $event->bookingInfo;
         $date->title = $this->title ?? $event->title;
