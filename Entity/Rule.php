@@ -126,8 +126,17 @@ class Rule
         $date->language = $event->language;
         $date->salesStatus = $this->salesStatus ?? $event->salesStatus;
         $date->image = $this->image ?? $event->image;
-        $date->genres = !empty($this->genres) ? $this->genres : $event->genres;
-        $date->keywords = !empty($this->keywords) ? $this->keywords : $event->keywords;
+
+        $date->genres = $event->genres;
+        if (!empty($this->genres)) {
+            array_push($date->genres, ...$this->genres);
+        }
+
+        $date->keywords = $event->keywords;
+        if (!empty($this->keywords)) {
+            array_push($date->keywords, ...$this->keywords);
+        }
+
         $date->partners = $event->partners;
 
         $date->eventExtra = $event->extra;
