@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace RevisionTen\Calendar\Services;
 
-use Cocur\Slugify\Slugify;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use RevisionTen\Calendar\Entity\Event;
@@ -23,6 +22,7 @@ use Solarium\Core\Client\Client;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\String\Slugger\AsciiSlugger;
 
 class CalendarService extends IndexService
 {
@@ -34,6 +34,8 @@ class CalendarService extends IndexService
 
     protected ContainerInterface $container;
 
+    private AsciiSlugger $slugger;
+
     public function __construct(ContainerInterface $container, LoggerInterface $logger, EntityManagerInterface $entityManager, PageService $pageService, array $config, AggregateFactory $aggregateFactory, SnapshotStore $snapshotStore, array $calendarConfig)
     {
         parent::__construct($container, $logger, $entityManager, $pageService, $config);
@@ -42,6 +44,7 @@ class CalendarService extends IndexService
         $this->snapshotStore = $snapshotStore;
         $this->calendarConfig = $calendarConfig;
         $this->container = $container;
+        $this->slugger = new AsciiSlugger($config['slugger_locale'] ?? 'de');
     }
 
     public function indexEvent(string $aggregateUuid): void
@@ -173,12 +176,11 @@ class CalendarService extends IndexService
         $eventRead->setPayload($fileData);
 
         // Update alias.
-        $slugify = new Slugify();
-        $hash = $slugify->slugify(hash('crc32', $aggregate->uuid));
+        $hash = $this->slugger->slug(hash('crc32', $aggregate->uuid))->lower()->toString();
         if (!empty($aggregate->genres) && is_array($aggregate->genres)) {
-            $slug = '/' . $slugify->slugify(implode('-', $aggregate->genres)) . '/' . $slugify->slugify($aggregate->title) . '-' . $hash;
+            $slug = '/' . $this->slugger->slug(implode('-', $aggregate->genres))->lower()->toString() . '/' . $this->slugger->slug($aggregate->title)->lower()->toString() . '-' . $hash;
         } else {
-            $slug = '/' . $slugify->slugify($aggregate->title) . '-' . $hash;
+            $slug = '/' . $this->slugger->slug($aggregate->title)->lower()->toString() . '-' . $hash;
         }
         $alias = $eventRead->getAlias();
         if (null === $alias) {

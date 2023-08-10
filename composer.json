@@ -11,11 +11,12 @@
         }
     ],
     "require": {
-        "php": ">=7.4.0",
+        "php": ">=8.1.0",
         "ext-json": "*",
         "revision-ten/cqrs": "^3",
         "revision-ten/cms": "^3",
-        "symfony/dependency-injection": "^5.3"
+        "symfony/dependency-injection": "^5.4",
+        "symfony/string": "^5.4"
     },
     "autoload": {
         "psr-4": { "RevisionTen\\Calendar\\": "" }
