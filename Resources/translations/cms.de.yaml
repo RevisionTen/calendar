@@ -56,6 +56,8 @@ calendar:
         repeats: "Wiederholungen"
     help:
         repeatEndDate: "Die Veranstaltung wird bis einschließlich zu diesem Datum wiederholt. Wenn dieses Feld leer gelassen wird, wird die Veranstaltung für einen Zeitraum von 365 Tagen wiederholt."
+        startDate: "Optionales Startdatum für Veranstaltungen die noch keine Termine haben."
+        endDate: "Optionales Enddatum für Veranstaltungen die noch keine Termine haben."
     salesStates:
         preSale: "noch nicht in den Verkauf gestartet"
         sale: "Verkauf"

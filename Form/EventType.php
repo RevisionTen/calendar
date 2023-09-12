@@ -6,6 +6,7 @@ use RevisionTen\Calendar\Entity\Event;
 use RevisionTen\CMS\Form\Types\UploadType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -141,6 +142,26 @@ class EventType extends AbstractType
             'required' => false,
             'show_file_picker' => true,
             'file_with_meta_data' => true,
+        ]);
+
+        $builder->add('startDate', DateTimeType::class, [
+            'label' => 'calendar.label.startDate',
+            'help' => 'calendar.help.startDate',
+            'translation_domain' => 'cms',
+            'required' => false,
+            'input' => 'timestamp',
+            'date_widget' => 'single_text',
+            'time_widget' => 'single_text',
+        ]);
+
+        $builder->add('endDate', DateTimeType::class, [
+            'label' => 'calendar.label.endDate',
+            'help' => 'calendar.help.endDate',
+            'translation_domain' => 'cms',
+            'required' => false,
+            'input' => 'timestamp',
+            'date_widget' => 'single_text',
+            'time_widget' => 'single_text',
         ]);
 
         $builder->add('save', SubmitType::class, [

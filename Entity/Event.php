@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace RevisionTen\Calendar\Entity;
 
+use DateTimeInterface;
 use Exception;
 use RevisionTen\CQRS\Model\Aggregate;
 
@@ -56,6 +57,10 @@ class Event extends Aggregate
     public array $deviations = [];
 
     public array $extra = [];
+
+    public ?DateTimeInterface $startDate = null;
+
+    public ?DateTimeInterface $endDate = null;
 
     public function getRule(string $ruleUuid): Rule
     {

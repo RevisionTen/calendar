@@ -33,6 +33,8 @@ class EventSerializer implements SolrSerializerInterface
         $docs[$id]->modified_dt = $helper->formatDate($event->modified);
         $docs[$id]->title_t = $helper->filterControlCharacters($event->title);
         $docs[$id]->description_t = $helper->filterControlCharacters($event->description);
+        $docs[$id]->startDate_dt = $event->startDate ? $helper->formatDate($event->startDate) : null;
+        $docs[$id]->endDate_dt = $event->endDate ? $helper->formatDate($event->endDate) : null;
 
         return $docs;
     }
