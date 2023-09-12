@@ -149,7 +149,7 @@ class EventType extends AbstractType
             'help' => 'calendar.help.startDate',
             'translation_domain' => 'cms',
             'required' => false,
-            'input' => 'timestamp',
+            'input' => 'datetime',
             'date_widget' => 'single_text',
             'time_widget' => 'single_text',
         ]);
@@ -159,7 +159,7 @@ class EventType extends AbstractType
             'help' => 'calendar.help.endDate',
             'translation_domain' => 'cms',
             'required' => false,
-            'input' => 'timestamp',
+            'input' => 'datetime',
             'date_widget' => 'single_text',
             'time_widget' => 'single_text',
         ]);
