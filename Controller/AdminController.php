@@ -165,8 +165,8 @@ class AdminController extends AbstractController
             'partners' => $event->partners,
             'venue' => $event->venue,
             'extra' => $event->extra,
-            'startDate' => $event->startDate->getTimestamp(),
-            'endDate' => $event->endDate->getTimestamp(),
+            'startDate' => $event->startDate?->getTimestamp(),
+            'endDate' => $event->endDate?->getTimestamp(),
         ];
 
         $calendarConfig = $this->getParameter('calendar');
